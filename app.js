@@ -224,8 +224,8 @@ function init() {
     document.getElementById('fileImportMissao').addEventListener('change', e => handlePDFImport(e, 'missions'));
     document.getElementById('fileImportDoc').addEventListener('change', e => handlePDFImport(e, 'documents'));
 
-    // TXT Import
-    document.getElementById('fileImportTxt').addEventListener('change', handleTxtImport);
+    // Restore Missions
+    document.getElementById('btnRestoreMissions').addEventListener('click', restoreMissions);
 
     // Dashboard
     document.getElementById('btnRefreshDashboard').addEventListener('click', renderDashboard);
