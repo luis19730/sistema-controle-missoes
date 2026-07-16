@@ -487,17 +487,17 @@ function printViewMission() {
         <html><head><title>${title}</title>
         <link rel="stylesheet" href="style.css?v=2">
         <style>
-            @page { size: A4; margin: 15mm 20mm; }
+            @page { size: A4; margin: 10mm 15mm; }
             * { box-sizing: border-box; }
-            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 11px; line-height: 1.4; color: #222; }
-            h2 { font-size: 16px; color: #556b2f; margin-bottom: 20px; text-align: center; }
-            .view-mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            body { font-family: 'IBM Plex Mono', 'Courier New', monospace; font-size: 9px; line-height: 1.3; color: #222; }
+            h2 { font-size: 13px; color: #556b2f; margin: 0 0 12px 0; text-align: center; }
+            .view-mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
             .view-field { break-inside: avoid; }
             .view-field.full-width { grid-column: 1 / -1; }
-            .view-field label { font-size: 9px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
-            .view-value { font-size: 10px; padding: 6px 10px; background: #f9f9f5; border: 1px solid #ddd; border-radius: 4px; line-height: 1.3; }
-            .view-value.notes { white-space: pre-wrap; min-height: 40px; font-size: 10px; }
-            .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: 700; }
+            .view-field label { font-size: 7px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.3px; display: block; margin-bottom: 1px; }
+            .view-value { font-size: 8px; padding: 3px 6px; background: #f9f9f5; border: 1px solid #ddd; border-radius: 3px; line-height: 1.2; }
+            .view-value.notes { white-space: pre-wrap; min-height: 24px; font-size: 8px; }
+            .badge { display: inline-block; padding: 1px 5px; border-radius: 8px; font-size: 7px; font-weight: 700; }
             .badge-resolved { background: #e8f0d8; color: #3d5a1f; }
             .badge-follow { background: #dbeafe; color: #1e40af; }
             .badge-deadline { background: #fef3c7; color: #92400e; }
@@ -508,7 +508,7 @@ function printViewMission() {
             .days-positive { color: #556b2f; font-weight: 700; }
             .days-zero { color: #d4a017; font-weight: 700; }
             .no-print { display: none; }
-            .print-footer { text-align: center; color: #aaa; font-size: 8px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 8px; }
+            .print-footer { text-align: center; color: #aaa; font-size: 7px; margin-top: 10px; border-top: 1px solid #eee; padding-top: 4px; }
             @media print { body { padding: 0; } .no-print { display: none; } }
         </style></head><body>
         <h2>${title}</h2>
