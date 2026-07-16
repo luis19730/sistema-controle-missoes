@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Controle de Missões - E4/Bda Inf Amv</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="C:\Users\luisa\Downloads\LOGO-BDA-AMV-site.png" alt="Logo BDA Inf Amv" class="header-logo">
+            <div class="header-text">
+                <h1>Sistema de Controle de Missões</h1>
+                <h2>E4/Bda Inf Amv</h2>
+            </div>
+            <div class="header-date" id="currentDate"></div>
+        </div>
+    </header>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="missions">Missões</button>
+        <button class="tab" data-tab="documents">Documentos para Despacho com o Cmt Bda</button>
+        <button class="tab" data-tab="dashboard">Painel</button>
+    </div>
+
+    <!-- Missões Tab -->
+    <div class="tab-content active" id="tab-missions">
+    <div class="stats-bar">
+        <div class="stat-card">
+            <span class="stat-number" id="totalMissions">0</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card resolved">
+            <span class="stat-number" id="resolvedCount">0</span>
+            <span class="stat-label">Resolvido</span>
+        </div>
+        <div class="stat-card follow">
+            <span class="stat-number" id="followCount">0</span>
+            <span class="stat-label">Acompanhar</span>
+        </div>
+        <div class="stat-card deadline">
+            <span class="stat-number" id="deadlineCount">0</span>
+            <span class="stat-label">Prazo Resposta</span>
+        </div>
+        <div class="stat-card overdue">
+            <span class="stat-number" id="overdueCount">0</span>
+            <span class="stat-label">Atrasado</span>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="btn btn-primary" id="btnNew">+ Nova Missão</button>
+        <button class="btn btn-secondary" id="btnExport">Exportar CSV</button>
+        <label class="btn btn-import" id="btnImportMissao">
+            Importar PDF
+            <input type="file" accept=".pdf" id="fileImportMissao" hidden>
+        </label>
+        <label class="btn btn-import" id="btnImportTxt" style="background-color:#556b2f;color:#fff;">
+            Importar TXT (806)
+            <input type="file" accept=".txt" id="fileImportTxt" hidden>
+        </label>
+        <button class="btn btn-overdue" id="btnAtrasados">Atrasados</button>
+        <button class="btn btn-deadline" id="btnPrazoResposta">Prazo de Resposta</button>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Buscar missão...">
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchDiex" placeholder="Nº DIEx...">
+        </div>
+        <div class="filter-group">
+            <label class="date-label">Prazo:</label>
+            <input type="date" id="filterDateStart">
+            <span class="date-separator">até</span>
+            <input type="date" id="filterDateEnd">
+            <button class="btn btn-secondary btn-small" id="btnClearDate">Limpar</button>
+        </div>
+        <div class="filter-group">
+            <select id="filterStatus">
+                <option value="">Todas Situações</option>
+                <option value="RESOLVIDO">Resolvido</option>
+                <option value="ACOMPANHAR">Acompanhar</option>
+                <option value="PRAZO DE RESPOSTA">Prazo de Resposta</option>
+                <option value="EVENTO">Evento</option>
+                <option value="Missão Cmt Bda">Missão Cmt Bda</option>
+                <option value="CALENDÁRIO DE OBRIGAÇÕES">Calendário de Obrigações</option>
+            </select>
+            <select id="filterClass">
+                <option value="">Todas Classes</option>
+                <option value="Cl I">Cl I</option>
+                <option value="Cl II">Cl II</option>
+                <option value="Cl III - Comb">Cl III - Comb</option>
+                <option value="Cl V">Cl V</option>
+                <option value="Cl VI">Cl VI</option>
+                <option value="Cl VII">Cl VII</option>
+                <option value="Cl VIII - Sau">Cl VIII - Sau</option>
+                <option value="Cl IX">Cl IX</option>
+                <option value="Orçamentário">Orçamentário</option>
+                <option value="Trnp">Trnp</option>
+                <option value="Mnt">Mnt</option>
+                <option value="MEM">MEM</option>
+                <option value="PREPARO F TER">Preparo F Ter</option>
+                <option value="Desfazimento">Desfazimento</option>
+                <option value="Patrimônio">Patrimônio</option>
+                <option value="VISITAS">Visitas</option>
+                <option value="NOVOS MEM">Novos MEM</option>
+            </select>
+            <select id="filterResponsible">
+                <option value="">Todos Militares</option>
+                <option value="Maj Filipe">Maj Filipe</option>
+                <option value="ST Valter">ST Valter</option>
+                <option value="ST Richardson">ST Richardson</option>
+                <option value="Cap Luis Augusto">Cap Luis Augusto</option>
+                <option value="Ten Glauco">Ten Glauco</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="missionsTable">
+            <thead>
+                <tr>
+                    <th class="sortable" data-col="id">Nº DIEx <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="event">Evento ou Missão <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="deadline">Prazo <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="daysLeft">Dias <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="responsible">Militar Resp. <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="status">Situação <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="class">Classe <span class="sort-arrow"></span></th>
+                    <th>Data Atualização</th>
+                    <th>Anotações</th>
+                    <th>Nº DIEx Enc. OMDS</th>
+                    <th>Nº DIEx Esc Superior</th>
+                    <th class="no-sort">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="missionsBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination"></div>
+    </div>
+
+    <!-- Documentos Tab -->
+    <div class="tab-content" id="tab-documents">
+    <div class="stats-bar">
+        <div class="stat-card">
+            <span class="stat-number" id="totalDocs">0</span>
+            <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-card resolved">
+            <span class="stat-number" id="resolvedDocs">0</span>
+            <span class="stat-label">Resolvido</span>
+        </div>
+        <div class="stat-card follow">
+            <span class="stat-number" id="pendingDocs">0</span>
+            <span class="stat-label">Aguardando</span>
+        </div>
+        <div class="stat-card deadline">
+            <span class="stat-number" id="scheduledDocs">0</span>
+            <span class="stat-label">Agendar</span>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <button class="btn btn-primary" id="btnNewDoc">+ Novo Documento</button>
+        <button class="btn btn-secondary" id="btnExportDoc">Exportar CSV</button>
+        <button class="btn btn-secondary" id="btnRestoreDocs" title="Restaurar documentos iniciais">Restaurar</button>
+        <label class="btn btn-import" id="btnImportDoc">
+            Importar PDF
+            <input type="file" accept=".pdf" id="fileImportDoc" hidden>
+        </label>
+        <div class="search-box">
+            <input type="text" id="searchDocInput" placeholder="Buscar documento...">
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchDocDiex" placeholder="Nº DIEx...">
+        </div>
+        <div class="filter-group">
+            <select id="filterDocStatus">
+                <option value="">Todas Situações</option>
+                <option value="AGENDAR">Agendar</option>
+                <option value="RESOLVIDO">Resolvido</option>
+                <option value="PENDENTE">Pendente</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="docsTable">
+            <thead>
+                <tr>
+                    <th class="sortable" data-col="diex">Nº DIEx <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="subject">Assunto do Despacho <span class="sort-arrow"></span></th>
+                    <th class="sortable" data-col="docStatus">Situação do Despacho <span class="sort-arrow"></span></th>
+                    <th>Anotações</th>
+                    <th class="no-sort">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="docsBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="paginationDocs"></div>
+    </div>
+
+    <!-- Modal Missões -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="missionModal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nova Missão</h3>
+                <button class="modal-close" id="btnClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldId">Nº DIEx da Missão</label>
+                        <input type="text" id="fieldId" placeholder="Ex: 8891-E-4/EMG/Cmdo Bda Inf Amv">
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldEvent">Evento ou Missão</label>
+                        <input type="text" id="fieldEvent" placeholder="Descrição da missão">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldDeadline">Prazo</label>
+                        <input type="date" id="fieldDeadline">
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldResponsible">Militar Responsável</label>
+                        <select id="fieldResponsible">
+                            <option value="">Selecione</option>
+                            <option value="Maj Filipe">Maj Filipe</option>
+                            <option value="ST Valter">ST Valter</option>
+                            <option value="ST Richardson">ST Richardson</option>
+                            <option value="Cap Luis Augusto">Cap Luis Augusto</option>
+                            <option value="Ten Glauco">Ten Glauco</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldStatus">Situação</label>
+                        <select id="fieldStatus">
+                            <option value="ACOMPANHAR">Acompanhar</option>
+                            <option value="RESOLVIDO">Resolvido</option>
+                            <option value="PRAZO DE RESPOSTA">Prazo de Resposta</option>
+                            <option value="EVENTO">Evento</option>
+                            <option value="Missão Cmt Bda">Missão Cmt Bda</option>
+                            <option value="CALENDÁRIO DE OBRIGAÇÕES">Calendário de Obrigações</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldClass">Classe</label>
+                        <select id="fieldClass">
+                            <option value="-">-</option>
+                            <option value="Cl I">Cl I</option>
+                            <option value="Cl II">Cl II</option>
+                            <option value="Cl III - Comb">Cl III - Comb</option>
+                            <option value="Cl V">Cl V</option>
+                            <option value="Cl VI">Cl VI</option>
+                            <option value="Cl VII">Cl VII</option>
+                            <option value="Cl VIII - Sau">Cl VIII - Sau</option>
+                            <option value="Cl IX">Cl IX</option>
+                            <option value="Orçamentário">Orçamentário</option>
+                            <option value="Trnp">Trnp</option>
+                            <option value="Mnt">Mnt</option>
+                            <option value="MEM">MEM</option>
+                            <option value="PREPARO F TER">PREPARO F TER</option>
+                            <option value="Desfazimento">Desfazimento</option>
+                            <option value="Patrimônio">Patrimônio</option>
+                            <option value="VISITAS">VISITAS</option>
+                            <option value="NOVOS MEM">NOVOS MEM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="fieldNotes">Anotações</label>
+                    <textarea id="fieldNotes" rows="4" placeholder="Observações sobre a missão..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldOmds">Nº DIEx Encaminhamento OMDS</label>
+                        <input type="text" id="fieldOmds" placeholder="Nº DIEx para OMDS">
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldEscSup">Nº DIEx para Esc Superior</label>
+                        <input type="text" id="fieldEscSup" placeholder="Nº DIEx para Esc Superior">
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="fieldLastUpdate">Data da Última Atualização</label>
+                    <input type="date" id="fieldLastUpdate">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancel">Cancelar</button>
+                <button class="btn btn-primary" id="btnSave">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteOverlay">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <button class="modal-close" id="btnCloseDelete">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir esta missão?</p>
+                <p class="delete-mission-name" id="deleteMissionName"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDelete">Cancelar</button>
+                <button class="btn btn-danger" id="btnConfirmDelete">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Documentos -->
+    <div class="modal-overlay" id="modalDocOverlay">
+        <div class="modal" id="docModal">
+            <div class="modal-header">
+                <h3 id="modalDocTitle">Novo Documento</h3>
+                <button class="modal-close" id="btnCloseDoc">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editDocId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldDocDiex">Nº DIEx</label>
+                        <input type="text" id="fieldDocDiex" placeholder="Ex: 2295-E4/2ª DE">
+                    </div>
+                    <div class="form-group">
+                        <label for="fieldDocSubject">Assunto do Despacho</label>
+                        <input type="text" id="fieldDocSubject" placeholder="Descrição do despacho">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldDocStatus">Situação do Despacho</label>
+                        <select id="fieldDocStatus">
+                            <option value="AGENDAR">Agendar</option>
+                            <option value="RESOLVIDO">Resolvido</option>
+                            <option value="PENDENTE">Pendente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="fieldDocNotes">Anotações</label>
+                    <textarea id="fieldDocNotes" rows="4" placeholder="Observações sobre o despacho..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDoc">Cancelar</button>
+                <button class="btn btn-primary" id="btnSaveDoc">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal Documentos -->
+    <div class="modal-overlay" id="deleteDocOverlay">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Confirmar Exclusão</h3>
+                <button class="modal-close" id="btnCloseDeleteDoc">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir este documento?</p>
+                <p class="delete-mission-name" id="deleteDocName"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCancelDeleteDoc">Cancelar</button>
+                <button class="btn btn-danger" id="btnConfirmDeleteDoc">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Mission Modal -->
+    <div class="modal-overlay" id="viewOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Visualizar Missão</h3>
+                <button class="modal-close" id="btnCloseView">&times;</button>
+            </div>
+            <div class="modal-body" id="viewMissionContent">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btnCloseViewFooter">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <div class="tab-content" id="tab-dashboard">
+        <div class="dashboard-header">
+            <h3>Painel de Desempenho</h3>
+            <button class="btn btn-secondary" id="btnRefreshDashboard">Atualizar</button>
+        </div>
+        <div class="dashboard-grid">
+            <div class="chart-card">
+                <h4>Missões por Situação</h4>
+                <div class="chart-container">
+                    <canvas id="chartStatus"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h4>Missões por Responsável</h4>
+                <div class="chart-container">
+                    <canvas id="chartResponsible"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h4>Missões por Classe</h4>
+                <div class="chart-container chart-container-wide">
+                    <canvas id="chartClass"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h4>Missões Atrasadas vs No Prazo</h4>
+                <div class="chart-container">
+                    <canvas id="chartOverdue"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

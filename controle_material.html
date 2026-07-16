@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Material - Bda Inf Amv</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #aaa;
+            font-size: 1.1em;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.08);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,212,255,0.2);
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #aaa;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1em;
+            outline: none;
+            transition: background 0.3s;
+        }
+        
+        .search-box:focus {
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .search-box::placeholder {
+            color: #888;
+        }
+        
+        select {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
+        }
+        
+        .table-container {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+        }
+        
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1a2e;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        
+        th:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        th::after {
+            content: ' ⇅';
+            font-size: 0.8em;
+            opacity: 0.5;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.9em;
+        }
+        
+        tr {
+            transition: background 0.2s;
+        }
+        
+        tr:hover {
+            background: rgba(0,212,255,0.1);
+        }
+        
+        tr:nth-child(even) {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .badge-ii {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        
+        .badge-ix {
+            background: #4ecdc4;
+            color: #fff;
+        }
+        
+        .badge-v {
+            background: #ffe66d;
+            color: #1a1a2e;
+        }
+        
+        .badge-vi {
+            background: #a8e6cf;
+            color: #1a1a2e;
+        }
+        
+        .status-homologada {
+            color: #00ff88;
+        }
+        
+        .status-pendente {
+            color: #ffe66d;
+        }
+        
+        .status-recolhido {
+            color: #ff6b6b;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 1.2em;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 1200px;
+            }
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-export {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 0.9em;
+        }
+        
+        .btn-export:hover {
+            background: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CONTROLE DE MATERIAL</h1>
+            <p class="subtitle">BDA INF AMV - Necessidade de Material | Atualizado em Julho 2026</p>
+        </header>
+        
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-value" id="total-items">0</div>
+                <div class="stat-label">Total de Itens</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-oms">0</div>
+                <div class="stat-label">OMs Envolvidas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-homologadas">0</div>
+                <div class="stat-label">DCGs Homologadas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-pendentes">0</div>
+                <div class="stat-label">Processos Pendentes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-recolher">0</div>
+                <div class="stat-label">Qtd a Recolher</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <input type="text" class="search-box" id="searchInput" placeholder="Buscar por OM, material, EB34...">
+            
+            <select id="filterClasse">
+                <option value="">Todas Classes</option>
+                <option value="II">Classe II</option>
+                <option value="V">Classe V</option>
+                <option value="VI">Classe VI</option>
+                <option value="IX">Classe IX</option>
+            </select>
+            
+            <select id="filterStatus">
+                <option value="">Todos Status</option>
+                <option value="homologada">DCG Homologada</option>
+                <option value="pendente">Processo Pendente</option>
+                <option value="recolhido">Material Recolhido</option>
+            </select>
+            
+            <select id="filterAcao">
+                <option value="">Todas Ações</option>
+                <option value="destruicao">Recolhimento/Destruição</option>
+                <option value="alienacao">Alienação</option>
+                <option value="outros">Outros</option>
+            </select>
+            
+            <button class="btn" onclick="clearFilters()">Limpar Filtros</button>
+            
+            <div class="export-buttons">
+                <button class="btn-export" onclick="exportCSV()">📥 CSV</button>
+                <button class="btn-export" onclick="printTable()">🖨️ Imprimir</button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="materialTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable(0)">OM</th>
+                        <th onclick="sortTable(1)">Classe</th>
+                        <th onclick="sortTable(2)">Material</th>
+                        <th onclick="sortTable(3)">EB34</th>
+                        <th onclick="sortTable(4)">QTD na OM</th>
+                        <th onclick="sortTable(5)">QTD a Recolher</th>
+                        <th onclick="sortTable(6)">ODR</th>
+                        <th onclick="sortTable(7)">Boletim / Data</th>
+                        <th onclick="sortTable(8)">Observação</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div class="no-results" id="noResults" style="display: none;">
+                Nenhum resultado encontrado.
+            </div>
+        </div>
+        
+        <footer>
+            <p>Sistema de Controle de Material Militar | BDA INF AMV</p>
+        </footer>
+    </div>
+    
+    <script>
+        const data = [
+            {om: "12ª Cia Com Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 48, odr: "XX", boletim: "08 - 03 SET 25", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "12ª Cia Com Amv", classe: "IX", material: "VTE - COM - MARRUÁ", eb34: "13259253", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 02 MAR 26", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "12ª Cia Com Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "58", qtdRecolher: "XX", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "12ª Cia E Cmb Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12245695", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 02 MAR 26", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "12ª Cia E Cmb Amv", classe: "IX", material: "VTP - PÁLIO", eb34: "FINAL DO CHASSIS: T237924", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "04 - 30 ABR 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "12ª Cia E Cmb Amv", classe: "IX", material: "VTP - KOMBI", eb34: "71133546", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "12ª Cia E Cmb Amv", classe: "IX", material: "VTNE MBB 5T", eb34: "12204298", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "12ª Cia E Cmb Amv", classe: "VI", material: "COLETE SALVA-VIDAS", eb34: "-", qtdOm: "XX", qtdRecolher: 50, odr: "XX", boletim: "02 - 28 FEV 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "12ª Cia E Cmb Amv", classe: "VI", material: "MOTOR DE POPA", eb34: "-", qtdOm: "XX", qtdRecolher: 10, odr: "XX", boletim: "02 - 28 FEV 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "12ª Cia E Cmb Amv", classe: "VI", material: "EMBARCAÇÃO DE REC", eb34: "-", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "06 - 02 JUL 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "12ª Cia E Cmb Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "285", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "12ª Cia E Cmb Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "21", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "12º Pel PE Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 84, odr: "24 - 07 ABR 26", boletim: "10 - 30 OUT 25", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "12º Pel PE Amv", classe: "IX", material: "VTP - FIESTA", eb34: "71152965", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "03 - 06 JUN 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "20º GAC Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "419", qtdRecolher: "XX", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "20º GAC Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "119", qtdRecolher: "XX", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "22º B Log Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 125, odr: "XX", boletim: "01 - 02 JAN 25", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "22º B Log Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 243, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "22º B Log Amv", classe: "IX", material: "VRNE 1T", eb34: "16063206", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 20 MAIO 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "22º B Log Amv", classe: "IX", material: "VTP - OPALA", eb34: "71048180", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "22º B Log Amv", classe: "IX", material: "VTNE - 1T", eb34: "12069272", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "22º B Log Amv", classe: "IX", material: "VTNE - 1T", eb34: "12069272", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "22º B Log Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12084053", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "08 - 03 SET 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "22º B Log Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "63", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "22º B Log Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "130", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "2º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 183, odr: "XX", boletim: "04 - 19 JUN 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "2º BI Amv", classe: "IX", material: "VTP - FIESTA", eb34: "71129749", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "2º BI Amv", classe: "IX", material: "VTP - PALIO", eb34: "71100191", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "XX", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "2º BI Amv", classe: "IX", material: "VRE - CIST ÁGUA", eb34: "17096178", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "2º BI Amv", classe: "IX", material: "VRE - 1 A/2T", eb34: "16066595, 16066607", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "2º BI Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12183920", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "08 - 03 SET 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "2º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "175", qtdRecolher: "XX", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "2º BI Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "720", qtdRecolher: "XX", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "5ª Bia AAAé Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12274293", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "08 - 03 SET 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "5ª Bia AAAé Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "443", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "5ª Bia AAAé Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "20", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "5º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 424, odr: "XX", boletim: "05 - 28 MAIO 26", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "5º BI Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 225, odr: "XX", boletim: "05 - 28 MAIO 26", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "5º BI Amv", classe: "II", material: "PLACA DE PROTEÇÃO BALÍSTICA", eb34: "-", qtdOm: "XX", qtdRecolher: 244, odr: "XX", boletim: "05 - 28 MAIO 26", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "5º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 154, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "5º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 154, odr: "XX", boletim: "08 - 03 SET 25", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "5º BI Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12158872", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 02 MAR 26", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "5º BI Amv", classe: "IX", material: "VRE - 1/2T", eb34: "75177436", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "5º BI Amv", classe: "IX", material: "VTNE MBB 5T", eb34: "12070984, 12070972", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "07 - 04 AGO 25", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "6º BI Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 383, odr: "XX", boletim: "01 - 02 JAN 25", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "6º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 32, odr: "XX", boletim: "03 - 31 MAR 26", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "6º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 95, odr: "XX", boletim: "04 - 19 JUN 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "6º BI Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 124, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "6º BI Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 204, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "6º BI Amv", classe: "IX", material: "VTNE MBB 5T", eb34: "12035780", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "01 - 25 ABR 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "6º BI Amv", classe: "IX", material: "VTNE MBB 5T", eb34: "1203578", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "6º BI Amv", classe: "IX", material: "VTP - MOTOCICLETA", eb34: "71083027", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "6º BI Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12178674, 12178686, 12145796, 12245760", qtdOm: "XX", qtdRecolher: 4, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "6º BI Amv", classe: "IX", material: "VTE - CISTERNA", eb34: "12118594", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "05 - 04 SET 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "Bda Inf Amn (OI)", classe: "V", material: "BINÓCULO ZENITH (Cl V)", eb34: "-", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "02 - 28 FEV 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "Bda Inf Amn (OI)", classe: "V", material: "BINÓCULO M48 (Cl V)", eb34: "-", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "02 - 28 FEV 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "Bda Inf Amn (OI)", classe: "V", material: "LUNETA BSHNELL (Cl V)", eb34: "-", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 28 FEV 25", obs: "Dcg homologada", status: "homologada", acao: "outros"},
+            {om: "Cia C Bda Inf Amv", classe: "II", material: "COLETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 10, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "Cia C Bda Inf Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 44, odr: "XX", boletim: "07 - 06 DEZ 24", obs: "Dcg homologada - Recolhimento ao OP para destruição", status: "homologada", acao: "destruicao"},
+            {om: "Cia C Bda Inf Amv", classe: "IX", material: "VTNE - LAND ROVER", eb34: "12071813", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 02 MAR 26", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "Cia C Bda Inf Amv", classe: "IX", material: "VTNE - MARRUÁ", eb34: "12206580", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "02 - 02 MAR 26", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "Cia C Bda Inf Amv", classe: "IX", material: "VTP - SANTANA", eb34: "FINAL CHASSIS: P003546; P003669", qtdOm: "XX", qtdRecolher: 2, odr: "XX", boletim: "03 - 06 JUN 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "Cia C Bda Inf Amv", classe: "IX", material: "VTP - PÁLIO", eb34: "71077611", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "03 - 06 JUN 24", obs: "Dcg homologada - Alienar no 22º B Log Amv", status: "homologada", acao: "alienacao"},
+            {om: "Cia C Bda Inf Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "164", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "1º Esqd C Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "540", qtdRecolher: "-", odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 1ª RM", status: "pendente", acao: "outros"},
+            {om: "1º Esqd C Amv", classe: "II", material: "CAPACETE BALÍSTICO", eb34: "-", qtdOm: "XX", qtdRecolher: 446, odr: "XX", boletim: "XX", obs: "Material recolhido ao 1º Dsup", status: "recolhido", acao: "outros"},
+            {om: "2º BI Amv", classe: "IX", material: "VTNE - LAND ROVER 130", eb34: "12002345", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "2º BI Amv", classe: "IX", material: "VTP - FIESTA", eb34: "71180705", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"},
+            {om: "2º BI Amv", classe: "IX", material: "VTE - AMB SPRINTER", eb34: "73018033", qtdOm: "XX", qtdRecolher: 1, odr: "XX", boletim: "XX", obs: "Processo de Dcg enviado para a 2ª RM", status: "pendente", acao: "outros"}
+        ];
+        
+        let filteredData = [...data];
+        let sortDirection = {};
+        
+        function getBadgeClass(classe) {
+            const classes = {
+                'II': 'badge-ii',
+                'V': 'badge-v',
+                'VI': 'badge-vi',
+                'IX': 'badge-ix'
+            };
+            return classes[classe] || 'badge-ii';
+        }
+        
+        function getStatusClass(status) {
+            const statuses = {
+                'homologada': 'status-homologada',
+                'pendente': 'status-pendente',
+                'recolhido': 'status-recolhido'
+            };
+            return statuses[status] || '';
+        }
+        
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            tbody.innerHTML = filteredData.map(item => `
+                <tr>
+                    <td><strong>${item.om}</strong></td>
+                    <td><span class="badge ${getBadgeClass(item.classe)}">${item.classe}</span></td>
+                    <td>${item.material}</td>
+                    <td>${item.eb34}</td>
+                    <td>${item.qtdOm}</td>
+                    <td>${item.qtdRecolher}</td>
+                    <td>${item.odr}</td>
+                    <td>${item.boletim}</td>
+                    <td class="${getStatusClass(item.status)}">${item.obs}</td>
+                </tr>
+            `).join('');
+            
+            updateStats();
+        }
+        
+        function updateStats() {
+            document.getElementById('total-items').textContent = filteredData.length;
+            
+            const oms = new Set(filteredData.map(d => d.om));
+            document.getElementById('total-oms').textContent = oms.size;
+            
+            const homologadas = filteredData.filter(d => d.status === 'homologada').length;
+            document.getElementById('total-homologadas').textContent = homologadas;
+            
+            const pendentes = filteredData.filter(d => d.status === 'pendente').length;
+            document.getElementById('total-pendentes').textContent = pendentes;
+            
+            const recolher = filteredData.reduce((sum, d) => {
+                const qty = typeof d.qtdRecolher === 'number' ? d.qtdRecolher : 0;
+                return sum + qty;
+            }, 0);
+            document.getElementById('total-recolher').textContent = recolher;
+        }
+        
+        function filterData() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const classe = document.getElementById('filterClasse').value;
+            const status = document.getElementById('filterStatus').value;
+            const acao = document.getElementById('filterAcao').value;
+            
+            filteredData = data.filter(item => {
+                const matchSearch = !search || 
+                    item.om.toLowerCase().includes(search) ||
+                    item.material.toLowerCase().includes(search) ||
+                    item.eb34.toLowerCase().includes(search) ||
+                    item.obs.toLowerCase().includes(search);
+                
+                const matchClasse = !classe || item.classe === classe;
+                const matchStatus = !status || item.status === status;
+                const matchAcao = !acao || item.acao === acao;
+                
+                return matchSearch && matchClasse && matchStatus && matchAcao;
+            });
+            
+            renderTable();
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterClasse').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterAcao').value = '';
+            filteredData = [...data];
+            renderTable();
+        }
+        
+        function sortTable(columnIndex) {
+            const keys = ['om', 'classe', 'material', 'eb34', 'qtdOm', 'qtdRecolher', 'odr', 'boletim', 'obs'];
+            const key = keys[columnIndex];
+            
+            sortDirection[key] = !sortDirection[key];
+            
+            filteredData.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+                
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return sortDirection[key] ? valA - valB : valB - valA;
+                }
+                
+                valA = String(valA).toLowerCase();
+                valB = String(valB).toLowerCase();
+                
+                if (sortDirection[key]) {
+                    return valA.localeCompare(valB);
+                } else {
+                    return valB.localeCompare(valA);
+                }
+            });
+            
+            renderTable();
+        }
+        
+        function exportCSV() {
+            const headers = ['OM', 'Classe', 'Material', 'EB34', 'QTD na OM', 'QTD a Recolher', 'ODR', 'Boletim', 'Observação'];
+            const csvContent = [
+                headers.join(';'),
+                ...filteredData.map(item => [
+                    item.om,
+                    item.classe,
+                    item.material,
+                    item.eb34,
+                    item.qtdOm,
+                    item.qtdRecolher,
+                    item.odr,
+                    item.boletim,
+                    `"${item.obs}"`
+                ].join(';'))
+            ].join('\n');
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('link');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'controle_material_bda_inf_amv.csv';
+            link.click();
+        }
+        
+        function printTable() {
+            window.print();
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', filterData);
+        document.getElementById('filterClasse').addEventListener('change', filterData);
+        document.getElementById('filterStatus').addEventListener('change', filterData);
+        document.getElementById('filterAcao').addEventListener('change', filterData);
+        
+        renderTable();
+    </script>
+</body>
+</html>
