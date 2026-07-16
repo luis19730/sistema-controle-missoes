@@ -162,6 +162,7 @@ function init() {
     document.getElementById('btnConfirmDelete').addEventListener('click', confirmDelete);
     document.getElementById('btnCloseView').addEventListener('click', closeViewModal);
     document.getElementById('btnCloseViewFooter').addEventListener('click', closeViewModal);
+    document.getElementById('btnPrintView').addEventListener('click', printViewMission);
     document.getElementById('searchInput').addEventListener('input', () => { currentPage = 1; render(); });
     document.getElementById('searchDiex').addEventListener('input', () => { currentPage = 1; render(); });
     document.getElementById('filterStatus').addEventListener('change', () => { currentPage = 1; render(); });
@@ -476,6 +477,39 @@ function viewMission(encodedId) {
 
 function closeViewModal() {
     document.getElementById('viewOverlay').classList.remove('active');
+}
+
+function printViewMission() {
+    const content = document.getElementById('viewMissionContent').innerHTML;
+    const title = document.querySelector('#viewOverlay .modal-header h3').textContent;
+    const win = window.open('', '_blank');
+    win.document.write(`
+        <html><head><title>${title}</title>
+        <link rel="stylesheet" href="style.css?v=2">
+        <style>
+            body { padding: 40px; font-family: 'IBM Plex Mono', monospace; }
+            .view-mission-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 800px; margin: 0 auto; }
+            .view-field { break-inside: avoid; }
+            .view-field.full-width { grid-column: 1 / -1; }
+            .view-field label { font-size: 0.75rem; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+            .view-value { font-size: 0.9rem; padding: 8px 12px; background: #f5f5f0; border: 1px solid #d4d9c8; border-radius: 8px; margin-top: 4px; }
+            .view-value.notes { white-space: pre-wrap; min-height: 60px; }
+            .badge { display: inline-block; padding: 4px 12px; border-radius: 24px; font-size: 0.75rem; font-weight: 700; }
+            .badge-resolved { background: #e8f0d8; color: #3d5a1f; }
+            .badge-follow { background: #dbeafe; color: #1e40af; }
+            .badge-deadline { background: #fef3c7; color: #92400e; }
+            .days-negative { color: #c0392b; font-weight: 700; }
+            .days-positive { color: #556b2f; font-weight: 700; }
+            .days-zero { color: #d4a017; font-weight: 700; }
+            @media print { body { padding: 20px; } .no-print { display: none; } }
+        </style></head><body>
+        <h2 style="margin-bottom:24px;color:#556b2f;">${title}</h2>
+        ${content}
+        <p style="margin-top:32px;text-align:center;color:#999;font-size:0.8rem;" class="no-print">Documento gerado em ${new Date().toLocaleString('pt-BR')}</p>
+        <script>window.print();<\/script>
+        </body></html>
+    `);
+    win.document.close();
 }
 
 function editMission(encodedId) {
