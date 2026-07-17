@@ -801,7 +801,9 @@ function exportDocCSV() {
 }
 
 function restoreDocs() {
-    if (!confirm('Restaurar todos os documentos para o padrão?\n\nIsso vai substituir todos os documentos atuais pelos 12 iniciais.')) return;
+    const pwd = prompt('Digite a senha para restaurar os documentos:');
+    if (pwd !== 'a23741') return;
+    if (!confirm('Restaurar todos os documentos para o padr\u00e3o?\n\nIsso vai substituir todos os documentos atuais pelos 12 iniciais.')) return;
     docs = [...INITIAL_DOCS];
     saveDocs();
     renderDocs();
@@ -1131,6 +1133,8 @@ function parseDateFromTxt(dateStr) {
 }
 
 function restoreMissions() {
+    const pwd = prompt('Digite a senha para restaurar as missões:');
+    if (pwd !== 'a23741') return;
     if (!confirm('Restaurar todas as missões para o padrão?\n\nIsso vai substituir todas as missões atuais pelas iniciais.')) return;
     missions = [...INITIAL_DATA];
     save();
