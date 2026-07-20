@@ -638,7 +638,11 @@ function updateDocStats() {
 function renderDocs() {
     updateDocStats();
     let data = getDocsFiltered();
+    const statusOrder = { 'AGENDAR': 0, 'PENDENTE': 1, '': 2, 'RESOLVIDO': 3 };
     data.sort((a, b) => {
+        const sa = statusOrder[a.docStatus] ?? 1;
+        const sb = statusOrder[b.docStatus] ?? 1;
+        if (sa !== sb) return sa - sb;
         let va = (a[docSortCol] || '').toLowerCase();
         let vb = (b[docSortCol] || '').toLowerCase();
         if (va < vb) return docSortDir === 'asc' ? -1 : 1;
