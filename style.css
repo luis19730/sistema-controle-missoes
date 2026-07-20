@@ -602,7 +602,7 @@ tbody td {
 }
 
 td.notes-cell {
-    max-width: 300px;
+    max-width: 450px;
     white-space: pre-wrap;
     font-size: 0.82rem;
     color: var(--text-secondary);
@@ -1130,7 +1130,7 @@ td.deadline-cell {
         max-width: 120px;
     }
     td.notes-cell {
-        max-width: 150px;
+        max-width: 220px;
     }
     .btn-action {
         padding: 5px 8px;
@@ -1225,7 +1225,7 @@ td.deadline-cell {
         max-width: 80px;
     }
     td.notes-cell {
-        max-width: 100px;
+        max-width: 160px;
     }
     .btn-action {
         font-size: 0.55rem;
@@ -1248,7 +1248,7 @@ td.deadline-cell {
     .stat-label { font-size: 0.5rem; }
     thead th, tbody td { padding: 4px 4px; }
     td.id-cell { max-width: 60px; font-size: 0.55rem; }
-    td.notes-cell { max-width: 70px; }
+    td.notes-cell { max-width: 120px; }
     .btn-action { font-size: 0.5rem; padding: 3px 4px; }
     .header-logo { height: 32px; }
 }

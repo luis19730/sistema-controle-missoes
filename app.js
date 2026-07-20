@@ -374,7 +374,6 @@ function render() {
             <td>${m.responsible || '-'}</td>
             <td>${statusBadge(m.status)}</td>
             <td>${m.class || '-'}</td>
-            <td class="deadline-cell">${m.lastUpdate ? formatDate(m.lastUpdate) : '-'}</td>
             <td class="notes-cell">${(m.notes || '').substring(0, 100)}${(m.notes || '').length > 100 ? '...' : ''}</td>
             <td class="id-cell">${m.omds || '-'}</td>
             <td class="id-cell">${m.escSup || '-'}</td>
