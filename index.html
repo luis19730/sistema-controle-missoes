@@ -51,6 +51,16 @@
         </div>
     </div>
 
+    <div class="alert-proximas" id="alertProximas" style="display:none;">
+        <div class="alert-icon">&#9888;</div>
+        <div class="alert-content">
+            <span class="alert-title">Missões com prazo nos próximos 14 dias</span>
+            <span class="alert-count" id="alertProximasCount">0</span>
+            <button class="btn btn-small btn-secondary" id="btnToggleProximas" onclick="toggleProximasList()" type="button">Ver lista</button>
+        </div>
+        <div class="proximas-list" id="proximasList" style="display:none;"></div>
+    </div>
+
     <div class="toolbar">
         <button class="btn btn-primary" id="btnNew">+ Nova Missão</button>
         <button class="btn btn-secondary" id="btnExport">Exportar CSV</button>
