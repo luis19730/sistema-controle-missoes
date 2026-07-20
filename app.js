@@ -327,6 +327,9 @@ function render() {
     document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
     document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline');
     data.sort((a, b) => {
+        const sa = a.status === 'RESOLVIDO' ? 1 : 0;
+        const sb = b.status === 'RESOLVIDO' ? 1 : 0;
+        if (sa !== sb) return sa - sb;
         let va, vb;
         switch (sortCol) {
             case 'daysLeft': va = getDaysLeft(a.deadline) ?? 9999; vb = getDaysLeft(b.deadline) ?? 9999; break;
