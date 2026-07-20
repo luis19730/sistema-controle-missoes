@@ -327,9 +327,6 @@ function render() {
     document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
     document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline');
     data.sort((a, b) => {
-        const sa = a.status === 'RESOLVIDO' ? 1 : 0;
-        const sb = b.status === 'RESOLVIDO' ? 1 : 0;
-        if (sa !== sb) return sa - sb;
         let va, vb;
         switch (sortCol) {
             case 'daysLeft': va = getDaysLeft(a.deadline) ?? 9999; vb = getDaysLeft(b.deadline) ?? 9999; break;
@@ -340,6 +337,9 @@ function render() {
         if (va > vb) return sortDir === 'asc' ? 1 : -1;
         return 0;
     });
+    const semResolvido = data.filter(m => m.status !== 'RESOLVIDO');
+    const resolvido = data.filter(m => m.status === 'RESOLVIDO');
+    data = semResolvido.concat(resolvido);
 
     document.querySelectorAll('#tab-missions th.sortable').forEach(th => {
         th.classList.remove('sort-asc', 'sort-desc');
