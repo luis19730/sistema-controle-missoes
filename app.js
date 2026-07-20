@@ -101,18 +101,18 @@ let INITIAL_DATA = [
 ];
 
 const INITIAL_DOCS = [
-    { diex: "2295-E4/2ª DE", subject: "distribuição de munição pesada e específica - 2ª DE 2026", docStatus: "AGENDAR", notes: "Sol feita pelo ChEM" },
-    { diex: "-", subject: "Trnp pacientes do HMASP pelo 2º BI Amv", docStatus: "AGENDAR", notes: "Sol que o 2º BI Amv confeccione DIEx para ser encaminhado à 2ª RM" },
-    { diex: "1035-S4/5º BIL", subject: "Boina do 5º BI Amv", docStatus: "RESOLVIDO", notes: "- Assunto já tratado com o Cmt.\n- S4/5º BI Amv sinalizou que está em vias de resolver problema com o 2º B Sup" },
-    { diex: "3689-E4.5/4ª Seç/CMSE", subject: "MEM Cl IX (Moto) - solicitação de transferência de VTNE 5t para a ESA (encaminho)", docStatus: "AGENDAR", notes: "Passar 1 VTNE 5 Ton para a ESA" },
-    { diex: "820-S/4/CMDO", subject: "Levantamento de necessidade de manutenção para Motocicleta (CL - IX) - RESPOSTA", docStatus: "AGENDAR", notes: "Sol o recurso de R$ 16.648,00 para Mnt das 11 Motos do Esqd\nInfo que estão sendo descarregadas 17 motos" },
-    { diex: "-", subject: "Verificar com a Aeronáutica a documentação necessária para alterar a posse da Anv Super Puma do 6º BI Amv para um dono de acervo e museu histórico", docStatus: "AGENDAR", notes: "Solicitação do Cmt da Bda na reunião de Consciência Situacional do dia 15 de junho 2026" },
-    { diex: "-", subject: "Providenciar a avaliação dos Pólos de Mnt do Forte Ipiranga", docStatus: "AGENDAR", notes: "Solicitação do Cmt da Bda na reunião de Consciência Situacional do dia 15 de junho 2026" },
-    { diex: "-", subject: "Mnt Vtr Marrua", docStatus: "", notes: "" },
-    { diex: "-", subject: "Distr Motocicletas", docStatus: "", notes: "" },
-    { diex: "-", subject: "DIEx sobre Plano de Mnt Vtr Marruá", docStatus: "", notes: "- Peças para Mnt parte da frota - aumento rápido da Dspn\n- Sol Ap mnt 3º Esc\n- Recurso para o COLOG para o restante das Vtr" },
-    { diex: "-", subject: "Sol Mochila GC", docStatus: "", notes: "" },
-    { diex: "-", subject: "Sol OVN", docStatus: "", notes: "" }
+    { date: "", diex: "2295-E4/2ª DE", subject: "distribuição de munição pesada e específica - 2ª DE 2026", docStatus: "AGENDAR", notes: "Sol feita pelo ChEM" },
+    { date: "", diex: "-", subject: "Trnp pacientes do HMASP pelo 2º BI Amv", docStatus: "AGENDAR", notes: "Sol que o 2º BI Amv confeccione DIEx para ser encaminhado à 2ª RM" },
+    { date: "", diex: "1035-S4/5º BIL", subject: "Boina do 5º BI Amv", docStatus: "RESOLVIDO", notes: "- Assunto já tratado com o Cmt.\n- S4/5º BI Amv sinalizou que está em vias de resolver problema com o 2º B Sup" },
+    { date: "", diex: "3689-E4.5/4ª Seç/CMSE", subject: "MEM Cl IX (Moto) - solicitação de transferência de VTNE 5t para a ESA (encaminho)", docStatus: "AGENDAR", notes: "Passar 1 VTNE 5 Ton para a ESA" },
+    { date: "", diex: "820-S/4/CMDO", subject: "Levantamento de necessidade de manutenção para Motocicleta (CL - IX) - RESPOSTA", docStatus: "AGENDAR", notes: "Sol o recurso de R$ 16.648,00 para Mnt das 11 Motos do Esqd\nInfo que estão sendo descarregadas 17 motos" },
+    { date: "", diex: "-", subject: "Verificar com a Aeronáutica a documentação necessária para alterar a posse da Anv Super Puma do 6º BI Amv para um dono de acervo e museu histórico", docStatus: "AGENDAR", notes: "Solicitação do Cmt da Bda na reunião de Consciência Situacional do dia 15 de junho 2026" },
+    { date: "", diex: "-", subject: "Providenciar a avaliação dos Pólos de Mnt do Forte Ipiranga", docStatus: "AGENDAR", notes: "Solicitação do Cmt da Bda na reunião de Consciência Situacional do dia 15 de junho 2026" },
+    { date: "", diex: "-", subject: "Mnt Vtr Marrua", docStatus: "", notes: "" },
+    { date: "", diex: "-", subject: "Distr Motocicletas", docStatus: "", notes: "" },
+    { date: "", diex: "-", subject: "DIEx sobre Plano de Mnt Vtr Marruá", docStatus: "", notes: "- Peças para Mnt parte da frota - aumento rápido da Dspn\n- Sol Ap mnt 3º Esc\n- Recurso para o COLOG para o restante das Vtr" },
+    { date: "", diex: "-", subject: "Sol Mochila GC", docStatus: "", notes: "" },
+    { date: "", diex: "-", subject: "Sol OVN", docStatus: "", notes: "" }
 ];
 
 // Use MISSIONS_DATA from missions_data.js if available
@@ -127,8 +127,8 @@ let currentDocPage = 1;
 const perPage = 25;
 let sortCol = 'deadline';
 let sortDir = 'asc';
-let docSortCol = 'diex';
-let docSortDir = 'asc';
+let docSortCol = 'date';
+let docSortDir = 'desc';
 let deleteTargetId = null;
 let deleteDocTargetIdx = null;
 let quickFilter = null;
@@ -668,6 +668,7 @@ function renderDocs() {
         let rowClass = '';
         if (d.docStatus === 'AGENDAR') rowClass = 'row-deadline';
         return `<tr class="${rowClass}">
+            <td class="deadline-cell">${d.date || '-'}</td>
             <td class="id-cell">${d.diex || '-'}</td>
             <td>${d.subject}</td>
             <td>${docStatusBadge(d.docStatus)}</td>
@@ -694,6 +695,7 @@ function openNewDocModal() {
     document.getElementById('modalDocTitle').textContent = 'Novo Documento';
     document.getElementById('editDocId').value = '';
     document.getElementById('fieldDocDiex').value = '';
+    document.getElementById('fieldDocDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('fieldDocSubject').value = '';
     document.getElementById('fieldDocStatus').value = 'AGENDAR';
     document.getElementById('fieldDocNotes').value = '';
@@ -706,6 +708,7 @@ function editDoc(idx) {
     document.getElementById('modalDocTitle').textContent = 'Editar Documento';
     document.getElementById('editDocId').value = idx;
     document.getElementById('fieldDocDiex').value = d.diex;
+    document.getElementById('fieldDocDate').value = d.date || '';
     document.getElementById('fieldDocSubject').value = d.subject;
     document.getElementById('fieldDocStatus').value = d.docStatus || 'PENDENTE';
     document.getElementById('fieldDocNotes').value = d.notes;
@@ -721,6 +724,7 @@ function saveDoc() {
     if (!subjectVal) { alert('Preencha o campo Assunto do Despacho.'); return; }
     const editId = document.getElementById('editDocId').value;
     const data = {
+        date: document.getElementById('fieldDocDate').value,
         diex: document.getElementById('fieldDocDiex').value.trim(),
         subject: subjectVal,
         docStatus: document.getElementById('fieldDocStatus').value,
@@ -797,9 +801,9 @@ function saveDocs() {
 
 function exportDocCSV() {
     const data = getDocsFiltered();
-    const header = ['Nº DIEx', 'Assunto do Despacho', 'Situação do Despacho', 'Anotações'];
+    const header = ['Data', 'Nº DIEx', 'Assunto do Despacho', 'Situação do Despacho', 'Anotações'];
     const rows = data.map(d => {
-        return [d.diex, d.subject, d.docStatus, d.notes].map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(',');
+        return [d.date, d.diex, d.subject, d.docStatus, d.notes].map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(',');
     });
     const csv = '\uFEFF' + header.join(';') + '\n' + rows.join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
