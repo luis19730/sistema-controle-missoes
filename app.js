@@ -1,32 +1,46 @@
-// ============ GITHUB SYNC ============
+// ============ FIREBASE SYNC ============
 
-const SYNC_REPO = 'luis19730/sistema-controle-missoes';
-const SYNC_FILE = 'app-data.json';
-const SYNC_BRANCH = 'gh-pages';
-const SYNC_API = 'https://api.github.com';
-
-let syncToken = localStorage.getItem('gh_sync_token') || '';
-let syncSHA = null;
-let syncStatus = 'idle'; // idle, loading, saving, error, ok
+let firebaseApp = null;
+let firebaseDb = null;
+let syncStatus = 'idle';
 let syncLastSave = null;
 let syncError = '';
+let firebaseConfig = null;
+let listenersAttached = false;
 
-function getSyncHeaders() {
-    return {
-        'Authorization': 'token ' + syncToken,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-    };
+function loadFirebaseConfig() {
+    try {
+        const raw = localStorage.getItem('firebase_config');
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
 }
 
-function setSyncToken(token) {
-    syncToken = token.trim();
-    if (syncToken) {
-        localStorage.setItem('gh_sync_token', syncToken);
-    } else {
-        localStorage.removeItem('gh_sync_token');
+function saveFirebaseConfig(config) {
+    localStorage.setItem('firebase_config', JSON.stringify(config));
+}
+
+function clearFirebaseConfig() {
+    localStorage.removeItem('firebase_config');
+    firebaseApp = null;
+    firebaseDb = null;
+    listenersAttached = false;
+}
+
+function initFirebase() {
+    firebaseConfig = loadFirebaseConfig();
+    if (!firebaseConfig || !firebaseConfig.projectId) return false;
+    try {
+        if (!firebaseApp) {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+        return true;
+    } catch (e) {
+        syncStatus = 'error';
+        syncError = e.message;
+        updateSyncUI();
+        return false;
     }
-    updateSyncUI();
 }
 
 function updateSyncUI() {
@@ -36,7 +50,7 @@ function updateSyncUI() {
     if (!dot || !label) return;
 
     dot.className = 'sync-dot';
-    if (!syncToken) {
+    if (!firebaseConfig || !firebaseConfig.projectId) {
         dot.classList.add('sync-off');
         label.textContent = 'Sync: não configurado';
         if (cfgBtn) cfgBtn.style.display = '';
@@ -60,77 +74,58 @@ function updateSyncUI() {
             break;
         case 'error':
             dot.classList.add('sync-error');
-            label.textContent = 'Sync: erro - ' + (syncError || 'verifique o token');
+            label.textContent = 'Sync: erro - ' + (syncError || 'verifique a config');
             break;
     }
 }
 
-async function syncLoad() {
-    if (!syncToken) return null;
-    syncStatus = 'loading';
+function syncSave(payload) {
+    if (!firebaseDb) return;
+    syncStatus = 'saving';
     updateSyncUI();
-    try {
-        const resp = await fetch(SYNC_API + '/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE + '?ref=' + SYNC_BRANCH, {
-            headers: getSyncHeaders()
-        });
-        if (resp.status === 404) {
-            syncSHA = null;
-            syncStatus = 'idle';
-            updateSyncUI();
-            return null;
-        }
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        syncSHA = data.sha;
-        const content = JSON.parse(atob(data.content));
+    firebaseDb.ref('bda_data').set(payload).then(() => {
+        syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         syncStatus = 'idle';
         updateSyncUI();
-        return content;
-    } catch (e) {
+    }).catch(e => {
+        syncStatus = 'error';
+        syncError = e.message;
+        updateSyncUI();
+    });
+}
+
+function syncLoad() {
+    if (!firebaseDb) return Promise.resolve(null);
+    syncStatus = 'loading';
+    updateSyncUI();
+    return firebaseDb.ref('bda_data').once('value').then(snap => {
+        syncStatus = 'idle';
+        updateSyncUI();
+        return snap.val();
+    }).catch(e => {
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
         return null;
-    }
+    });
 }
 
-async function syncSave(payload) {
-    if (!syncToken) return false;
-    syncStatus = 'saving';
-    updateSyncUI();
-    try {
-        const body = {
-            message: 'Sync: atualização automática ' + new Date().toISOString(),
-            content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
-            branch: SYNC_BRANCH
-        };
-        if (syncSHA) body.sha = syncSHA;
-
-        const resp = await fetch(SYNC_API + '/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE, {
-            method: 'PUT',
-            headers: getSyncHeaders(),
-            body: JSON.stringify(body)
-        });
-        if (!resp.ok) {
-            const err = await resp.json().catch(() => ({}));
-            throw new Error(err.message || 'HTTP ' + resp.status);
+function syncListen(callback) {
+    if (!firebaseDb || listenersAttached) return;
+    listenersAttached = true;
+    firebaseDb.ref('bda_data').on('value', snap => {
+        const data = snap.val();
+        if (data && data.missions) {
+            callback(data);
         }
-        const result = await resp.json();
-        syncSHA = result.content.sha;
-        syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        syncStatus = 'idle';
-        updateSyncUI();
-        return true;
-    } catch (e) {
-        syncStatus = 'error';
-        syncError = e.message;
-        updateSyncUI();
-        return false;
-    }
+    });
 }
 
 function openSyncConfig() {
-    document.getElementById('syncTokenInput').value = syncToken;
+    const cfg = loadFirebaseConfig();
+    document.getElementById('fbApiKey').value = cfg ? cfg.apiKey || '' : '';
+    document.getElementById('fbProjectId').value = cfg ? cfg.projectId || '' : '';
+    document.getElementById('fbDatabaseUrl').value = cfg ? cfg.databaseURL || '' : '';
     document.getElementById('modalSyncOverlay').classList.add('active');
 }
 
@@ -139,13 +134,24 @@ function closeSyncConfig() {
 }
 
 function saveSyncConfig() {
-    const token = document.getElementById('syncTokenInput').value.trim();
-    setSyncToken(token);
+    const config = {
+        apiKey: document.getElementById('fbApiKey').value.trim(),
+        projectId: document.getElementById('fbProjectId').value.trim(),
+        databaseURL: document.getElementById('fbDatabaseUrl').value.trim(),
+        authDomain: document.getElementById('fbProjectId').value.trim() + '.firebaseapp.com',
+        storageBucket: document.getElementById('fbProjectId').value.trim() + '.appspot.com'
+    };
+    if (!config.apiKey || !config.projectId || !config.databaseURL) {
+        alert('Preencha todos os campos.');
+        return;
+    }
+    saveFirebaseConfig(config);
     closeSyncConfig();
-    if (token) {
+    clearFirebaseConfig();
+    if (initFirebase()) {
         syncLoad().then(remote => {
             if (remote && remote.missions) {
-                if (confirm('Dados encontrados no GitHub. Deseja carregá-los (substitui dados locais)?')) {
+                if (confirm('Dados encontrados no Firebase. Deseja carregá-los (substitui dados locais)?')) {
                     missions = remote.missions;
                     docs = remote.docs || [];
                     localStorage.setItem('bdaMissions', JSON.stringify(missions));
@@ -154,8 +160,24 @@ function saveSyncConfig() {
                     renderDocs();
                 }
             }
+            syncListen(onRemoteUpdate);
         });
     }
+    updateSyncUI();
+}
+
+function onRemoteUpdate(data) {
+    missions = data.missions || [...INITIAL_DATA];
+    docs = data.docs || [...INITIAL_DOCS];
+    localStorage.setItem('bdaMissions', JSON.stringify(missions));
+    localStorage.setItem('bdaDocs', JSON.stringify(docs));
+    render();
+    renderDocs();
+}
+
+function disableSync() {
+    clearFirebaseConfig();
+    updateSyncUI();
 }
 
 function normalizarData(str) {
@@ -315,16 +337,20 @@ function init() {
     const savedDocs = localStorage.getItem('bdaDocs');
     docs = savedDocs ? JSON.parse(savedDocs) : [...INITIAL_DOCS];
 
-    syncLoad().then(remote => {
-        if (remote && remote.missions) {
-            missions = remote.missions;
-            docs = remote.docs || [];
-            localStorage.setItem('bdaMissions', JSON.stringify(missions));
-            localStorage.setItem('bdaDocs', JSON.stringify(docs));
-            render();
-            renderDocs();
-        }
-    });
+    if (initFirebase()) {
+        syncLoad().then(remote => {
+            if (remote && remote.missions) {
+                missions = remote.missions;
+                docs = remote.docs || [];
+                localStorage.setItem('bdaMissions', JSON.stringify(missions));
+                localStorage.setItem('bdaDocs', JSON.stringify(docs));
+                render();
+                renderDocs();
+            }
+            syncListen(onRemoteUpdate);
+        });
+    }
+    updateSyncUI();
 
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 

@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css?v=2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <header>
@@ -547,32 +549,50 @@
     <div class="modal-overlay" id="modalSyncOverlay">
         <div class="modal modal-small">
             <div class="modal-header">
-                <h3>Configurar Sincronização GitHub</h3>
+                <h3>Configurar Sincronização Firebase</h3>
                 <button class="modal-close" onclick="closeSyncConfig()">&times;</button>
             </div>
             <div class="modal-body">
                 <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
-                    Para sincronizar dados entre máquinas, insira um <strong>Personal Access Token</strong> do GitHub com permissão <code>repo</code>.<br><br>
-                    <strong>Como criar:</strong><br>
-                    1. Acesse <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
-                    2. Clique em "Generate new token (classic)"<br>
-                    3. Marque a permissão <code>repo</code><br>
-                    4. Copie o token e cole abaixo
+                    Para sincronizar dados entre máquinas em tempo real, crie um projeto no Firebase:<br><br>
+                    <strong>Passo a passo:</strong><br>
+                    1. Acesse <a href="https://console.firebase.google.com/" target="_blank">console.firebase.google.com</a><br>
+                    2. Clique em <strong>"Criar projeto"</strong> (pode usar o nome que quiser)<br>
+                    3. No menu lateral, clique em <strong>"Realtime Database"</strong> → <strong>"Criar banco de dados"</strong><br>
+                    4. Escolha uma região e clique em <strong>"Ativar"</strong><br>
+                    5. Na aba <strong>"Regras"</strong>, cole:<br>
+                    <code style="background:#1a1a2e;padding:4px 8px;border-radius:4px;font-size:12px;display:block;margin:6px 0;">{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}</code>
+                    6. Clique em <strong>"Publicar"</strong><br>
+                    7. Vá em <strong>"Configurações do projeto"</strong> (engrenagem) → <strong>"Contas do projeto"</strong><br>
+                    8. Copie os valores abaixo:
                 </p>
                 <div class="form-group">
-                    <label for="syncTokenInput">GitHub Personal Access Token</label>
-                    <input type="password" id="syncTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-card);color:var(--text);">
+                    <label for="fbApiKey">API Key</label>
+                    <input type="text" id="fbApiKey" placeholder="AIzaSy..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;">
+                </div>
+                <div class="form-group">
+                    <label for="fbProjectId">Project ID</label>
+                    <input type="text" id="fbProjectId" placeholder="meu-projeto-xxxxx" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;">
+                </div>
+                <div class="form-group">
+                    <label for="fbDatabaseUrl">Database URL</label>
+                    <input type="text" id="fbDatabaseUrl" placeholder="https://meu-projeto-xxxxx-default-rtdb.firebaseio.com" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:12px;">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeSyncConfig()">Cancelar</button>
-                <button class="btn btn-danger" onclick="setSyncToken('');closeSyncConfig();">Desativar Sync</button>
+                <button class="btn btn-danger" onclick="disableSync();closeSyncConfig();">Desativar Sync</button>
                 <button class="btn btn-primary" onclick="saveSyncConfig()">Salvar e Conectar</button>
             </div>
         </div>
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=9"></script>
+    <script src="app.js?v=10"></script>
 </body>
 </html>
