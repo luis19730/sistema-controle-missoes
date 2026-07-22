@@ -494,16 +494,24 @@
 
         <!-- Modal Contatos -->
         <div class="modal-overlay" id="modalContatos" style="display:none;">
-            <div class="modal" style="max-width:480px;">
+            <div class="modal" style="max-width:640px;width:95%;">
                 <div class="modal-header">
                     <h3>Gerenciar Contatos</h3>
                     <button class="modal-close" onclick="fecharModalContatos()">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div style="display:flex;gap:8px;margin-bottom:16px;">
-                        <input type="text" id="contatoNome" class="filtro-input" placeholder="Nome" style="flex:1;">
-                        <input type="tel" id="contatoTelefone" class="filtro-input" placeholder="Telefone (ex: 5512988843234)" style="flex:1.5;">
-                        <button class="btn btn-primary" id="btnSalvarContato" style="font-size:12px;padding:8px 14px;">Salvar</button>
+                    <div style="display:grid;grid-template-columns:1fr 1.5fr auto;gap:8px;margin-bottom:16px;align-items:end;">
+                        <div>
+                            <label style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;display:block;">Nome</label>
+                            <input type="text" id="contatoNome" class="filtro-input" placeholder="Nome do contato" style="width:100%;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;display:block;">Telefone</label>
+                            <input type="tel" id="contatoTelefone" class="filtro-input" placeholder="5512988843234" style="width:100%;">
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" id="btnSalvarContato" style="padding:8px 20px;">Salvar</button>
+                        </div>
                     </div>
                     <div id="listaContatosModal"></div>
                 </div>
