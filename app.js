@@ -21,7 +21,10 @@ const DEFAULT_FIREBASE_CONFIG = {
 function loadFirebaseConfig() {
     try {
         const raw = localStorage.getItem('firebase_config');
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.projectId) return parsed;
+        }
     } catch (e) {}
     return DEFAULT_FIREBASE_CONFIG;
 }
