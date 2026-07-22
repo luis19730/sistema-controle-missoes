@@ -12,6 +12,29 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+    <script>
+        (function() {
+            var DEFAULT_FB = {
+                apiKey: "AIzaSyB2FGHNE4uMZncqIQpKmrwnGeWcRgGPdGU",
+                authDomain: "bda-controle-missoes.firebaseapp.com",
+                databaseURL: "https://bda-controle-missoes-default-rtdb.firebaseio.com",
+                projectId: "bda-controle-missoes",
+                storageBucket: "bda-controle-missoes.firebasestorage.app",
+                messagingSenderId: "631031685831",
+                appId: "1:631031685831:web:0d135926883d773faa4558"
+            };
+            try {
+                var raw = localStorage.getItem('firebase_config');
+                var parsed = raw ? JSON.parse(raw) : null;
+                if (!parsed || !parsed.projectId) {
+                    localStorage.setItem('firebase_config', JSON.stringify(DEFAULT_FB));
+                    console.log('[Sync] Config padrão injetada no localStorage');
+                }
+            } catch(e) {
+                localStorage.setItem('firebase_config', JSON.stringify(DEFAULT_FB));
+            }
+        })();
+    </script>
 </head>
 <body>
     <header>
