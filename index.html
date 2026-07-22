@@ -17,6 +17,11 @@
                 <h2>E4/Bda Inf Amv</h2>
             </div>
             <div class="header-date" id="currentDate"></div>
+            <div class="sync-status" id="syncStatus">
+                <span class="sync-dot sync-off" id="syncDot"></span>
+                <span class="sync-label" id="syncLabel">Sync: não configurado</span>
+                <button class="btn btn-small btn-secondary" id="btnSyncConfig" onclick="openSyncConfig()">Config</button>
+            </div>
         </div>
     </header>
 
@@ -538,7 +543,36 @@
         </div>
     </div>
 
+    <!-- Sync Config Modal -->
+    <div class="modal-overlay" id="modalSyncOverlay">
+        <div class="modal modal-small">
+            <div class="modal-header">
+                <h3>Configurar Sincronização GitHub</h3>
+                <button class="modal-close" onclick="closeSyncConfig()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">
+                    Para sincronizar dados entre máquinas, insira um <strong>Personal Access Token</strong> do GitHub com permissão <code>repo</code>.<br><br>
+                    <strong>Como criar:</strong><br>
+                    1. Acesse <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a><br>
+                    2. Clique em "Generate new token (classic)"<br>
+                    3. Marque a permissão <code>repo</code><br>
+                    4. Copie o token e cole abaixo
+                </p>
+                <div class="form-group">
+                    <label for="syncTokenInput">GitHub Personal Access Token</label>
+                    <input type="password" id="syncTokenInput" placeholder="ghp_xxxxxxxxxxxx" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg-card);color:var(--text);">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSyncConfig()">Cancelar</button>
+                <button class="btn btn-danger" onclick="setSyncToken('');closeSyncConfig();">Desativar Sync</button>
+                <button class="btn btn-primary" onclick="saveSyncConfig()">Salvar e Conectar</button>
+            </div>
+        </div>
+    </div>
+
     <script src="missions_data.js"></script>
-    <script src="app.js?v=8"></script>
+    <script src="app.js?v=9"></script>
 </body>
 </html>

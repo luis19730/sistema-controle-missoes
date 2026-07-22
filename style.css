@@ -1283,3 +1283,12 @@ td.deadline-cell {
 .preview-ok { text-align: center; padding: 24px; color: var(--text-secondary); }
 .preview-ok h3 { color: var(--primary); }
 .indicador-alerta { border: 1px solid; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+
+.sync-status { display: flex; align-items: center; gap: 8px; margin-left: 16px; }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.sync-dot.sync-ok { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.sync-dot.sync-off { background: #6b7280; }
+.sync-dot.sync-loading { background: #eab308; animation: syncPulse 1s infinite; }
+.sync-dot.sync-error { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+@keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.sync-label { font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap; }

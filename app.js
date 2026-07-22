@@ -1,3 +1,163 @@
+// ============ GITHUB SYNC ============
+
+const SYNC_REPO = 'luis19730/sistema-controle-missoes';
+const SYNC_FILE = 'app-data.json';
+const SYNC_BRANCH = 'gh-pages';
+const SYNC_API = 'https://api.github.com';
+
+let syncToken = localStorage.getItem('gh_sync_token') || '';
+let syncSHA = null;
+let syncStatus = 'idle'; // idle, loading, saving, error, ok
+let syncLastSave = null;
+let syncError = '';
+
+function getSyncHeaders() {
+    return {
+        'Authorization': 'token ' + syncToken,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+    };
+}
+
+function setSyncToken(token) {
+    syncToken = token.trim();
+    if (syncToken) {
+        localStorage.setItem('gh_sync_token', syncToken);
+    } else {
+        localStorage.removeItem('gh_sync_token');
+    }
+    updateSyncUI();
+}
+
+function updateSyncUI() {
+    const dot = document.getElementById('syncDot');
+    const label = document.getElementById('syncLabel');
+    const cfgBtn = document.getElementById('btnSyncConfig');
+    if (!dot || !label) return;
+
+    dot.className = 'sync-dot';
+    if (!syncToken) {
+        dot.classList.add('sync-off');
+        label.textContent = 'Sync: não configurado';
+        if (cfgBtn) cfgBtn.style.display = '';
+        return;
+    }
+
+    if (cfgBtn) cfgBtn.style.display = 'none';
+
+    switch (syncStatus) {
+        case 'idle':
+            dot.classList.add('sync-ok');
+            label.textContent = syncLastSave ? 'Sync: ok (' + syncLastSave + ')' : 'Sync: conectado';
+            break;
+        case 'loading':
+            dot.classList.add('sync-loading');
+            label.textContent = 'Sync: carregando...';
+            break;
+        case 'saving':
+            dot.classList.add('sync-loading');
+            label.textContent = 'Sync: salvando...';
+            break;
+        case 'error':
+            dot.classList.add('sync-error');
+            label.textContent = 'Sync: erro - ' + (syncError || 'verifique o token');
+            break;
+    }
+}
+
+async function syncLoad() {
+    if (!syncToken) return null;
+    syncStatus = 'loading';
+    updateSyncUI();
+    try {
+        const resp = await fetch(SYNC_API + '/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE + '?ref=' + SYNC_BRANCH, {
+            headers: getSyncHeaders()
+        });
+        if (resp.status === 404) {
+            syncSHA = null;
+            syncStatus = 'idle';
+            updateSyncUI();
+            return null;
+        }
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        syncSHA = data.sha;
+        const content = JSON.parse(atob(data.content));
+        syncStatus = 'idle';
+        updateSyncUI();
+        return content;
+    } catch (e) {
+        syncStatus = 'error';
+        syncError = e.message;
+        updateSyncUI();
+        return null;
+    }
+}
+
+async function syncSave(payload) {
+    if (!syncToken) return false;
+    syncStatus = 'saving';
+    updateSyncUI();
+    try {
+        const body = {
+            message: 'Sync: atualização automática ' + new Date().toISOString(),
+            content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
+            branch: SYNC_BRANCH
+        };
+        if (syncSHA) body.sha = syncSHA;
+
+        const resp = await fetch(SYNC_API + '/repos/' + SYNC_REPO + '/contents/' + SYNC_FILE, {
+            method: 'PUT',
+            headers: getSyncHeaders(),
+            body: JSON.stringify(body)
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            throw new Error(err.message || 'HTTP ' + resp.status);
+        }
+        const result = await resp.json();
+        syncSHA = result.content.sha;
+        syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        syncStatus = 'idle';
+        updateSyncUI();
+        return true;
+    } catch (e) {
+        syncStatus = 'error';
+        syncError = e.message;
+        updateSyncUI();
+        return false;
+    }
+}
+
+function openSyncConfig() {
+    document.getElementById('syncTokenInput').value = syncToken;
+    document.getElementById('modalSyncOverlay').classList.add('active');
+}
+
+function closeSyncConfig() {
+    document.getElementById('modalSyncOverlay').classList.remove('active');
+}
+
+function saveSyncConfig() {
+    const token = document.getElementById('syncTokenInput').value.trim();
+    setSyncToken(token);
+    closeSyncConfig();
+    if (token) {
+        syncLoad().then(remote => {
+            if (remote && remote.missions) {
+                if (confirm('Dados encontrados no GitHub. Deseja carregá-los (substitui dados locais)?')) {
+                    missions = remote.missions;
+                    docs = remote.docs || [];
+                    localStorage.setItem('bdaMissions', JSON.stringify(missions));
+                    localStorage.setItem('bdaDocs', JSON.stringify(docs));
+                    render();
+                    renderDocs();
+                }
+            }
+        });
+    }
+}
+
 function normalizarData(str) {
     if (!str) return null;
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str + 'T00:00:00');
@@ -154,6 +314,17 @@ function init() {
     missions = saved ? JSON.parse(saved) : [...INITIAL_DATA];
     const savedDocs = localStorage.getItem('bdaDocs');
     docs = savedDocs ? JSON.parse(savedDocs) : [...INITIAL_DOCS];
+
+    syncLoad().then(remote => {
+        if (remote && remote.missions) {
+            missions = remote.missions;
+            docs = remote.docs || [];
+            localStorage.setItem('bdaMissions', JSON.stringify(missions));
+            localStorage.setItem('bdaDocs', JSON.stringify(docs));
+            render();
+            renderDocs();
+        }
+    });
 
     document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -852,6 +1023,7 @@ function confirmDelete() {
 
 function save() {
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
+    syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
 }
 
 function exportCSV() {
@@ -1050,6 +1222,7 @@ function confirmDeleteDoc() {
 
 function saveDocs() {
     localStorage.setItem('bdaDocs', JSON.stringify(docs));
+    syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
 }
 
 function exportDocCSV() {
