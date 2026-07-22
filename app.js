@@ -504,12 +504,12 @@ function renderizarContatos() {
 
 function renderizarContatosModal() {
     const c = document.getElementById('listaContatosModal');
-    if (!contatos.length) { c.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Nenhum contato cadastrado</p>'; return; }
-    let html = '<table style="width:100%;border-collapse:collapse;"><tr style="border-bottom:1px solid #444;"><th style="text-align:left;padding:8px;font-size:12px;color:#aaa;">Nome</th><th style="text-align:left;padding:8px;font-size:12px;color:#aaa;">Telefone</th><th style="text-align:right;padding:8px;font-size:12px;color:#aaa;">Ações</th></tr>';
+    if (!contatos.length) { c.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:24px;">Nenhum contato cadastrado</p>'; return; }
+    let html = '<table><thead><tr><th>Nome</th><th>Telefone</th><th style="text-align:right;">Ações</th></tr></thead><tbody>';
     contatos.forEach((ct, i) => {
-        html += '<tr style="border-bottom:1px solid #444;"><td style="padding:8px;">' + ct.nome + '</td><td style="padding:8px;color:#aaa;">' + ct.telefone + '</td><td style="padding:8px;text-align:right;"><button class="btn-editar-contato" data-idx="' + i + '" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;margin-right:8px;">Editar</button><button class="btn-excluir-contato" data-idx="' + i + '" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;">Excluir</button></td></tr>';
+        html += '<tr><td>' + ct.nome + '</td><td style="color:var(--text-secondary);font-family:monospace;">' + ct.telefone + '</td><td style="text-align:right;"><button class="btn-editar-contato" data-idx="' + i + '" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;margin-right:8px;">Editar</button><button class="btn-excluir-contato" data-idx="' + i + '" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;">Excluir</button></td></tr>';
     });
-    html += '</table>';
+    html += '</tbody></table>';
     c.innerHTML = html;
     c.querySelectorAll('.btn-editar-contato').forEach(btn => btn.addEventListener('click', function() {
         const idx = parseInt(this.dataset.idx);
