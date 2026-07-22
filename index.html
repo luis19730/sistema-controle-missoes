@@ -494,26 +494,24 @@
 
         <!-- Modal Contatos -->
         <div class="modal-overlay" id="modalContatos" style="display:none;">
-            <div class="modal modal-contatos" style="max-width:90vw;width:90vw;max-height:90vh;height:auto;">
+            <div class="modal modal-contatos" style="max-width:90vw;width:90vw;max-height:90vh;">
                 <div class="modal-header">
                     <h3>Gerenciar Contatos</h3>
                     <button class="modal-close" onclick="fecharModalContatos()">&times;</button>
                 </div>
-                <div class="modal-body" style="padding:20px 24px;">
-                    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:flex-end;">
-                        <div style="flex:2;">
+                <div class="modal-body" style="padding:20px 24px;display:flex;flex-direction:column;height:100%;">
+                    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:flex-end;">
+                        <div style="flex:2;min-width:0;">
                             <label style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;display:block;">Nome</label>
-                            <input type="text" id="contatoNome" class="filtro-input" placeholder="Nome do contato" style="width:100%;">
+                            <input type="text" id="contatoNome" class="filtro-input" placeholder="Nome do contato" style="width:100%;box-sizing:border-box;">
                         </div>
-                        <div style="flex:3;">
+                        <div style="flex:3;min-width:0;">
                             <label style="font-size:12px;color:var(--text-secondary);margin-bottom:4px;display:block;">Telefone (ex: 5512988843234)</label>
-                            <input type="tel" id="contatoTelefone" class="filtro-input" placeholder="5512988843234" style="width:100%;">
+                            <input type="tel" id="contatoTelefone" class="filtro-input" placeholder="5512988843234" style="width:100%;box-sizing:border-box;">
                         </div>
-                        <div>
-                            <button class="btn btn-primary" id="btnSalvarContato" style="padding:8px 20px;white-space:nowrap;">Salvar</button>
-                        </div>
+                        <button class="btn btn-primary" id="btnSalvarContato" style="padding:8px 20px;white-space:nowrap;flex-shrink:0;">Salvar</button>
                     </div>
-                    <div style="border-top:1px solid var(--border);padding-top:12px;">
+                    <div style="border-top:1px solid var(--border);padding-top:12px;flex:1;overflow-y:auto;">
                         <div id="listaContatosModal"></div>
                     </div>
                 </div>
