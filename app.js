@@ -145,7 +145,7 @@ let sortCol = 'deadline';
 let sortDir = 'asc';
 let docSortCol = 'date';
 let docSortDir = 'desc';
-let deleteTargetId = null;
+let deleteTargetIdx = null;
 let deleteDocTargetIdx = null;
 let quickFilter = null;
 
@@ -622,6 +622,7 @@ function render() {
         } else if (m.status === 'PRAZO DE RESPOSTA') {
             rowClass = 'row-deadline';
         }
+        const globalIdx = missions.indexOf(m);
         return `<tr class="${rowClass}">
             <td class="id-cell">${m.id || '-'}</td>
             <td>${m.event}</td>
@@ -634,9 +635,9 @@ function render() {
             <td class="id-cell">${m.omds || '-'}</td>
             <td class="id-cell">${m.escSup || '-'}</td>
             <td>
-                <button class="btn-action btn-view" onclick="viewMission('${encodeURIComponent(m.id)}')">Visualizar</button>
-                <button class="btn-action btn-edit" onclick="editMission('${encodeURIComponent(m.id)}')">Editar</button>
-                <button class="btn-action btn-delete" onclick="deleteMission('${encodeURIComponent(m.id)}')">Excluir</button>
+                <button class="btn-action btn-view" onclick="viewMission(${globalIdx})">Visualizar</button>
+                <button class="btn-action btn-edit" onclick="editMission(${globalIdx})">Editar</button>
+                <button class="btn-action btn-delete" onclick="deleteMission(${globalIdx})">Excluir</button>
             </td>
         </tr>`;
     }).join('');
@@ -671,9 +672,8 @@ function openNewModal() {
     document.getElementById('modalOverlay').classList.add('active');
 }
 
-function viewMission(encodedId) {
-    const id = decodeURIComponent(encodedId);
-    const m = missions.find(x => x.id === id);
+function viewMission(idx) {
+    const m = missions[idx];
     if (!m) return;
 
     const daysLeft = getDaysLeft(m.deadline);
@@ -781,12 +781,11 @@ function printViewMission() {
     win.document.close();
 }
 
-function editMission(encodedId) {
-    const id = decodeURIComponent(encodedId);
-    const m = missions.find(x => x.id === id);
+function editMission(idx) {
+    const m = missions[idx];
     if (!m) return;
     document.getElementById('modalTitle').textContent = 'Editar Missão';
-    document.getElementById('editId').value = id;
+    document.getElementById('editId').value = idx;
     document.getElementById('fieldId').value = m.id;
     document.getElementById('fieldEvent').value = m.event;
     document.getElementById('fieldDeadline').value = m.deadline;
@@ -820,9 +819,8 @@ function saveMission() {
         escSup: document.getElementById('fieldEscSup').value.trim(),
         lastUpdate: document.getElementById('fieldLastUpdate').value
     };
-    if (editId) {
-        const idx = missions.findIndex(x => x.id === editId);
-        if (idx !== -1) missions[idx] = data;
+    if (editId !== '') {
+        missions[parseInt(editId)] = data;
     } else {
         missions.push(data);
     }
@@ -831,23 +829,22 @@ function saveMission() {
     render();
 }
 
-function deleteMission(encodedId) {
-    const id = decodeURIComponent(encodedId);
-    const m = missions.find(x => x.id === id);
+function deleteMission(idx) {
+    const m = missions[idx];
     if (!m) return;
-    deleteTargetId = id;
+    deleteTargetIdx = idx;
     document.getElementById('deleteMissionName').textContent = m.event;
     document.getElementById('deleteOverlay').classList.add('active');
 }
 
 function closeDeleteModal() {
     document.getElementById('deleteOverlay').classList.remove('active');
-    deleteTargetId = null;
+    deleteTargetIdx = null;
 }
 
 function confirmDelete() {
-    if (deleteTargetId === null) return;
-    missions = missions.filter(x => x.id !== deleteTargetId);
+    if (deleteTargetIdx === null) return;
+    missions.splice(deleteTargetIdx, 1);
     save();
     closeDeleteModal();
     render();
