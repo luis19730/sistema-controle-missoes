@@ -14,6 +14,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script>
         (function() {
+            var APP_VERSION = 'v14';
+            var stored = localStorage.getItem('app_version');
+            if (stored !== APP_VERSION) {
+                localStorage.setItem('app_version', APP_VERSION);
+                window.location.replace(window.location.href.split('?')[0] + '?v=' + Date.now());
+                return;
+            }
             var DEFAULT_FB = {
                 apiKey: "AIzaSyB2FGHNE4uMZncqIQpKmrwnGeWcRgGPdGU",
                 authDomain: "bda-controle-missoes.firebaseapp.com",
@@ -627,6 +634,6 @@
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
 </body>
 </html>
