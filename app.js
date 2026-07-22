@@ -619,7 +619,8 @@ function enviarWhatsApp() {
     const sel = contatos.filter(c => c.selecionado !== false);
     if (!sel.length) { alert('Selecione pelo menos um contato.'); return; }
     const msg = encodeURIComponent(formatarMensagemWhatsApp());
-    sel.forEach((c, i) => setTimeout(() => window.open('https://wa.me/' + c.telefone + '?text=' + msg, '_blank'), i * 500));
+    const url = 'https://wa.me/' + sel[0].telefone + '?text=' + msg;
+    window.location.href = url;
 }
 
 function copiarMensagem() {
