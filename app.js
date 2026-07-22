@@ -8,11 +8,22 @@ let syncError = '';
 let firebaseConfig = null;
 let listenersAttached = false;
 
+const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB2FGHNE4uMZncqIQpKmrwnGeWcRgGPdGU",
+    authDomain: "bda-controle-missoes.firebaseapp.com",
+    databaseURL: "https://bda-controle-missoes-default-rtdb.firebaseio.com",
+    projectId: "bda-controle-missoes",
+    storageBucket: "bda-controle-missoes.firebasestorage.app",
+    messagingSenderId: "968392432514",
+    appId: "1:968392432514:web:ca0aeb30739c085e994d9b"
+};
+
 function loadFirebaseConfig() {
     try {
         const raw = localStorage.getItem('firebase_config');
-        return raw ? JSON.parse(raw) : null;
-    } catch (e) { return null; }
+        if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return DEFAULT_FIREBASE_CONFIG;
 }
 
 function saveFirebaseConfig(config) {
