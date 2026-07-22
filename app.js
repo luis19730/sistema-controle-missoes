@@ -360,6 +360,8 @@ function init() {
                 localStorage.setItem('bdaDocs', JSON.stringify(docs));
                 render();
                 renderDocs();
+            } else {
+                syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
             }
             syncListen(onRemoteUpdate);
         });
