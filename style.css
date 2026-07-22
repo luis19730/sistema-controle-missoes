@@ -1254,7 +1254,7 @@ td.deadline-cell {
 }
 
 /* Modal Contatos */
-.modal-contatos .modal-body { max-height: 70vh; overflow-y: auto; }
+.modal-contatos .modal-body { padding: 24px 32px; }
 .modal-contatos table { width: 100%; border-collapse: collapse; }
 .modal-contatos table tr { border-bottom: 1px solid var(--border); }
 .modal-contatos table th { text-align: left; padding: 8px 12px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
