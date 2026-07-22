@@ -23,6 +23,7 @@
     <div class="tabs">
         <button class="tab active" data-tab="missions">Missões</button>
         <button class="tab" data-tab="documents">Documentos para Despacho com o Cmt Bda</button>
+        <button class="tab" data-tab="whatsapp">WhatsApp</button>
         <button class="tab" data-tab="dashboard">Painel</button>
     </div>
 
@@ -412,6 +413,97 @@
         </div>
     </div>
 
+    <!-- WhatsApp Tab -->
+    <div class="tab-content" id="tab-whatsapp">
+        <div class="whatsapp-section">
+            <div class="indicador-alerta" style="background:rgba(34,197,94,0.1);border-color:#22c55e;">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%;">
+                    <span style="color:#22c55e;font-size:14px;font-weight:700;">📱 Destinatários:</span>
+                    <div id="listaContatos" style="display:flex;flex-wrap:wrap;gap:8px;flex:1;"></div>
+                    <button class="btn btn-primary" id="btnGerenciarContatos" style="font-size:12px;padding:6px 14px;">+ Contato</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="whatsapp-section">
+            <h3>Filtros</h3>
+            <div class="filtros-whatsapp">
+                <div class="filtro-grupo">
+                    <label>Período</label>
+                    <select id="filtroDias" class="filtro-input">
+                        <option value="2">Próximos 2 dias</option>
+                        <option value="3">Próximos 3 dias</option>
+                        <option value="5">Próximos 5 dias</option>
+                        <option value="7" selected>Próximos 7 dias</option>
+                        <option value="15">Próximos 15 dias</option>
+                        <option value="30">Próximos 30 dias</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <label>Responsável</label>
+                    <select id="filtroResponsavel" class="filtro-input">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="whatsapp-actions">
+            <button id="btnEnviar" class="btn btn-primary">📱 Enviar via WhatsApp</button>
+            <button id="btnCopiar" class="btn btn-secondary">📋 Copiar Mensagem</button>
+        </div>
+
+        <div class="whatsapp-section">
+            <h3>Preview das Missões</h3>
+            <div id="previewContainer"></div>
+        </div>
+
+        <div class="whatsapp-section">
+            <h3>Mensagem Formatada</h3>
+            <div class="mensagem-whatsapp">
+                <pre id="mensagemBruta"></pre>
+            </div>
+        </div>
+
+        <div class="whatsapp-section">
+            <h3>Como Funciona</h3>
+            <div class="instrucoes-container">
+                <div class="instrucao-item">
+                    <div class="instrucao-numero">1</div>
+                    <div class="instrucao-texto">
+                        <strong>Envio Manual</strong>
+                        <p>Clique em "Enviar via WhatsApp" para abrir o WhatsApp com a mensagem pronta.</p>
+                    </div>
+                </div>
+                <div class="instrucao-item">
+                    <div class="instrucao-numero">2</div>
+                    <div class="instrucao-texto">
+                        <strong>Copiar Mensagem</strong>
+                        <p>Copie a mensagem e cole no WhatsApp, Telegram ou qualquer outro aplicativo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Contatos -->
+        <div class="modal-overlay" id="modalContatos" style="display:none;">
+            <div class="modal" style="max-width:480px;">
+                <div class="modal-header">
+                    <h3>Gerenciar Contatos</h3>
+                    <button class="modal-close" onclick="fecharModalContatos()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="display:flex;gap:8px;margin-bottom:16px;">
+                        <input type="text" id="contatoNome" class="filtro-input" placeholder="Nome" style="flex:1;">
+                        <input type="tel" id="contatoTelefone" class="filtro-input" placeholder="Telefone (ex: 5512988843234)" style="flex:1.5;">
+                        <button class="btn btn-primary" id="btnSalvarContato" style="font-size:12px;padding:8px 14px;">Salvar</button>
+                    </div>
+                    <div id="listaContatosModal"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Dashboard Tab -->
     <div class="tab-content" id="tab-dashboard">
         <div class="dashboard-header">
@@ -447,6 +539,6 @@
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=6"></script>
+    <script src="app.js?v=7"></script>
 </body>
 </html>

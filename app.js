@@ -1,3 +1,19 @@
+function normalizarData(str) {
+    if (!str) return null;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str + 'T00:00:00');
+    const meses = { 'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3, 'mai': 4, 'jun': 5, 'jul': 6, 'ago': 7, 'set': 8, 'out': 9, 'nov': 10, 'dez': 11 };
+    const m = str.match(/(\d{1,2})\s*([a-z]{3})\.?\s*(\d{2,4})/i);
+    if (m) {
+        const dia = parseInt(m[1]);
+        const mes = meses[m[2].toLowerCase()];
+        let ano = parseInt(m[3]);
+        if (ano < 100) ano += 2000;
+        if (mes !== undefined) return new Date(ano, mes, dia);
+    }
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? null : d;
+}
+
 // MISSIONS_DATA will be loaded from missions_data.js if available
 let INITIAL_DATA = [
     { id: "8891-E-4/EMG/Cmdo Bda Inf Amv", event: "Andamento dos Subprojetos da 4ª Seção - Brigada de Infantaria Amv 2040", deadline: "2025-10-31", responsible: "Maj Filipe", status: "ACOMPANHAR", class: "-", lastUpdate: "", notes: "1. apresentação com 01 (um) slide que resuma as principais ações de suas respectivas equipes em prol do desenvolvimento dos subprojetos demateriais e logística da Bda Inf Amv", omds: "", escSup: "" },
@@ -240,6 +256,246 @@ function init() {
 
     render();
     renderDocs();
+    initWhatsApp();
+}
+
+// ============ WhatsApp ============
+
+let filtroDias = 7;
+let filtroResponsavelWA = '';
+let missoesVisiveis = [];
+let selecionadas = new Set();
+let contatos = [];
+let contatoEditandoIdx = -1;
+
+function carregarContatos() {
+    try { contatos = JSON.parse(localStorage.getItem('whatsapp_contatos') || '[]'); } catch (e) { contatos = []; }
+    if (contatos.length === 0) {
+        contatos = [{ nome: 'Comandante', telefone: '5512988843234' }];
+        salvarContatos();
+    }
+}
+
+function salvarContatos() { localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos)); }
+
+function renderizarContatos() {
+    const c = document.getElementById('listaContatos');
+    let html = '';
+    contatos.forEach((ct, i) => {
+        html += '<label class="contato-chip"><input type="checkbox" class="check-contato" data-idx="' + i + '"' + (ct.selecionado !== false ? ' checked' : '') + '><span>' + ct.nome + '</span></label>';
+    });
+    if (!contatos.length) html = '<span style="color:#aaa;font-size:13px;">Nenhum contato cadastrado</span>';
+    c.innerHTML = html;
+    c.querySelectorAll('.check-contato').forEach(cb => {
+        cb.addEventListener('change', function() {
+            contatos[parseInt(this.dataset.idx)].selecionado = this.checked;
+            salvarContatos();
+            renderizarMensagemBruta();
+        });
+    });
+    c.querySelectorAll('.contato-chip').forEach(chip => {
+        chip.addEventListener('dblclick', function() {
+            const idx = parseInt(this.dataset.idx);
+            abrirModalContatos();
+            document.getElementById('contatoNome').value = contatos[idx].nome;
+            document.getElementById('contatoTelefone').value = contatos[idx].telefone;
+            contatoEditandoIdx = idx;
+            document.getElementById('btnSalvarContato').textContent = 'Atualizar';
+        });
+    });
+}
+
+function renderizarContatosModal() {
+    const c = document.getElementById('listaContatosModal');
+    if (!contatos.length) { c.innerHTML = '<p style="color:#aaa;text-align:center;padding:20px;">Nenhum contato cadastrado</p>'; return; }
+    let html = '<table style="width:100%;border-collapse:collapse;"><tr style="border-bottom:1px solid #444;"><th style="text-align:left;padding:8px;font-size:12px;color:#aaa;">Nome</th><th style="text-align:left;padding:8px;font-size:12px;color:#aaa;">Telefone</th><th style="text-align:right;padding:8px;font-size:12px;color:#aaa;">Ações</th></tr>';
+    contatos.forEach((ct, i) => {
+        html += '<tr style="border-bottom:1px solid #444;"><td style="padding:8px;">' + ct.nome + '</td><td style="padding:8px;color:#aaa;">' + ct.telefone + '</td><td style="padding:8px;text-align:right;"><button class="btn-editar-contato" data-idx="' + i + '" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:13px;margin-right:8px;">Editar</button><button class="btn-excluir-contato" data-idx="' + i + '" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:13px;">Excluir</button></td></tr>';
+    });
+    html += '</table>';
+    c.innerHTML = html;
+    c.querySelectorAll('.btn-editar-contato').forEach(btn => btn.addEventListener('click', function() {
+        const idx = parseInt(this.dataset.idx);
+        document.getElementById('contatoNome').value = contatos[idx].nome;
+        document.getElementById('contatoTelefone').value = contatos[idx].telefone;
+        contatoEditandoIdx = idx;
+        document.getElementById('btnSalvarContato').textContent = 'Atualizar';
+    }));
+    c.querySelectorAll('.btn-excluir-contato').forEach(btn => btn.addEventListener('click', function() {
+        const idx = parseInt(this.dataset.idx);
+        if (confirm('Excluir "' + contatos[idx].nome + '"?')) { contatos.splice(idx, 1); salvarContatos(); renderizarContatos(); renderizarContatosModal(); }
+    }));
+}
+
+function abrirModalContatos() {
+    document.getElementById('modalContatos').style.display = 'flex';
+    document.getElementById('contatoNome').value = '';
+    document.getElementById('contatoTelefone').value = '';
+    contatoEditandoIdx = -1;
+    document.getElementById('btnSalvarContato').textContent = 'Salvar';
+    renderizarContatosModal();
+}
+window.fecharModalContatos = function() { document.getElementById('modalContatos').style.display = 'none'; };
+
+function salvarContatoForm() {
+    const nome = document.getElementById('contatoNome').value.trim();
+    const telefone = document.getElementById('contatoTelefone').value.replace(/\D/g, '').trim();
+    if (!nome) { alert('Informe o nome do contato.'); return; }
+    if (!telefone) { alert('Informe o telefone do contato.'); return; }
+    if (contatoEditandoIdx >= 0) { contatos[contatoEditandoIdx].nome = nome; contatos[contatoEditandoIdx].telefone = telefone; }
+    else contatos.push({ nome, telefone, selecionado: true });
+    salvarContatos(); renderizarContatos(); renderizarContatosModal();
+    document.getElementById('contatoNome').value = '';
+    document.getElementById('contatoTelefone').value = '';
+    contatoEditandoIdx = -1;
+    document.getElementById('btnSalvarContato').textContent = 'Salvar';
+}
+
+function obterMissoesProximosDias() {
+    if (typeof missions === 'undefined') return [];
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const limite = new Date(hoje); limite.setDate(limite.getDate() + filtroDias);
+    return missions.filter(m => {
+        if (m.status === 'RESOLVIDO') return false;
+        if (filtroResponsavelWA && m.responsible !== filtroResponsavelWA) return false;
+        const d = normalizarData(m.deadline);
+        if (!d) return false;
+        return d >= hoje && d <= limite;
+    }).map(m => {
+        const d = normalizarData(m.deadline);
+        const diff = Math.ceil((d - hoje) / (1000 * 60 * 60 * 24));
+        let prazoLabel = diff === 0 ? 'HOJE' : diff === 1 ? 'AMANHÃ' : 'EM ' + diff + ' DIAS';
+        return Object.assign({}, m, { prazoLabel, diasRestantes: diff });
+    }).sort((a, b) => a.diasRestantes - b.diasRestantes);
+}
+
+function obterMissoesVencidas() {
+    if (typeof missions === 'undefined') return [];
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    return missions.filter(m => {
+        if (m.status === 'RESOLVIDO') return false;
+        if (filtroResponsavelWA && m.responsible !== filtroResponsavelWA) return false;
+        const d = normalizarData(m.deadline);
+        if (!d) return false;
+        return d < hoje;
+    });
+}
+
+function chaveMissao(m) { return (m.id || '') + '|' + (m.deadline || '') + '|' + (m.event || ''); }
+
+function toggleSelecionada(chave) {
+    if (selecionadas.has(chave)) selecionadas.delete(chave); else selecionadas.add(chave);
+    renderizarMensagemBruta();
+}
+
+function toggleTodas(tipo) {
+    document.querySelectorAll('.check-missao').forEach(cb => {
+        cb.checked = tipo === 'marcar';
+        if (tipo === 'marcar') selecionadas.add(cb.dataset.chave); else selecionadas.delete(cb.dataset.chave);
+    });
+    renderizarMensagemBruta();
+}
+
+function formatarMensagemWhatsApp() {
+    const sel = missoesVisiveis.filter(m => selecionadas.has(chaveMissao(m)));
+    const vencidas = sel.filter(m => { const d = normalizarData(m.deadline); const h = new Date(); h.setHours(0,0,0,0); return d && d < h; });
+    const proximas = sel.filter(m => { const d = normalizarData(m.deadline); const h = new Date(); h.setHours(0,0,0,0); return d && d >= h; }).sort((a, b) => a.diasRestantes - b.diasRestantes);
+    const hoje = new Date();
+    const dataStr = hoje.getDate() + '/' + (hoje.getMonth() + 1) + '/' + hoje.getFullYear();
+    let msg = '🔔 *LEMBRETE DIÁRIO - BDA INF AMV*\n📅 ' + dataStr;
+    if (filtroResponsavelWA) msg += '\n👤 *Responsável: ' + filtroResponsavelWA + '*';
+    msg += '\n━━━━━━━━━━━━━━━━━━━━';
+    if (vencidas.length) {
+        msg += '\n\n⚠️ *MISSÕES VENCIDAS (' + vencidas.length + '):*';
+        vencidas.forEach((m, i) => { msg += '\n\n' + (i+1) + '. ' + (m.event||'Sem descrição') + '\n   📋 DIEx: ' + (m.id||'N/I') + '\n   👤 Resp: ' + (m.responsible||'N/I') + '\n   ⏰ Prazo: ' + (m.deadline||'N/I') + ' (ATRASADO)'; });
+    }
+    if (proximas.length) {
+        msg += '\n\n📅 *MISSÕES DOS PRÓXIMOS ' + filtroDias + ' DIAS (' + proximas.length + '):*';
+        proximas.forEach((m, i) => { msg += '\n\n' + (i+1) + '. ' + (m.event||'Sem descrição') + '\n   📋 DIEx: ' + (m.id||'N/I') + '\n   👤 Resp: ' + (m.responsible||'N/I') + '\n   ⏰ Prazo: ' + (m.deadline||'N/I') + ' (' + m.prazoLabel + ')\n   📁 Classe: ' + (m.class||'N/I'); });
+    }
+    if (!sel.length) msg += '\n\n✅ Nenhuma missão selecionada.';
+    msg += '\n\n━━━━━━━━━━━━━━━━━━━━\n💻 Sistema de Gerenciamento - Bda Inf Amv';
+    return msg;
+}
+
+function enviarWhatsApp() {
+    const sel = contatos.filter(c => c.selecionado !== false);
+    if (!sel.length) { alert('Selecione pelo menos um contato.'); return; }
+    const msg = encodeURIComponent(formatarMensagemWhatsApp());
+    sel.forEach((c, i) => setTimeout(() => window.open('https://wa.me/' + c.telefone + '?text=' + msg, '_blank'), i * 500));
+}
+
+function copiarMensagem() {
+    navigator.clipboard.writeText(formatarMensagemWhatsApp()).then(() => {
+        const btn = document.getElementById('btnCopiar');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copiado!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+    });
+}
+
+function renderizarPreviewDiario() {
+    const c = document.getElementById('previewContainer');
+    const proximas = obterMissoesProximosDias();
+    const vencidas = obterMissoesVencidas();
+    missoesVisiveis = [];
+    selecionadas = new Set();
+    let html = '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;"><button class="btn btn-secondary" onclick="toggleTodas(\'marcar\')" style="font-size:11px;padding:5px 12px;">Marcar Todas</button><button class="btn btn-secondary" onclick="toggleTodas(\'desmarcar\')" style="font-size:11px;padding:5px 12px;">Desmarcar Todas</button><span style="font-size:12px;color:#aaa;"></span></div>';
+    if (vencidas.length) {
+        html += '<div class="preview-secao preview-vencidas"><h3>⚠️ Missões Vencidas (' + vencidas.length + ')</h3>';
+        vencidas.forEach(m => {
+            const chave = chaveMissao(m); missoesVisiveis.push(m); selecionadas.add(chave);
+            html += '<div class="preview-item item-vencido"><label class="preview-check"><input type="checkbox" class="check-missao" data-chave="' + chave + '" checked onchange="toggleSelecionada(this.dataset.chave)"></label><div class="preview-conteudo"><div class="preview-titulo">' + (m.event||'Sem descrição') + '</div><div class="preview-detalhes"><span>📋 ' + (m.id||'N/I') + '</span> <span>👤 ' + (m.responsible||'N/I') + '</span> <span>⏰ ' + (m.deadline||'N/I') + '</span></div></div></div>';
+        });
+        html += '</div>';
+    }
+    if (proximas.length) {
+        html += '<div class="preview-secao preview-proximas"><h3>📅 Próximos ' + filtroDias + ' Dias (' + proximas.length + ')</h3>';
+        proximas.forEach(m => {
+            const chave = chaveMissao(m); missoesVisiveis.push(m); selecionadas.add(chave);
+            const cor = m.diasRestantes === 0 ? '#ef4444' : m.diasRestantes <= 2 ? '#f97316' : '#eab308';
+            html += '<div class="preview-item item-proximo"><label class="preview-check"><input type="checkbox" class="check-missao" data-chave="' + chave + '" checked onchange="toggleSelecionada(this.dataset.chave)"></label><div class="preview-conteudo"><div class="preview-badge" style="background:' + cor + ';">' + m.prazoLabel + '</div><div class="preview-titulo">' + (m.event||'Sem descrição') + '</div><div class="preview-detalhes"><span>📋 ' + (m.id||'N/I') + '</span> <span>👤 ' + (m.responsible||'N/I') + '</span> <span>📁 ' + (m.class||'N/I') + '</span></div></div></div>';
+        });
+        html += '</div>';
+    }
+    if (!vencidas.length && !proximas.length) html = '<div class="preview-secao preview-ok"><h3>✅ Tudo em dia!</h3><p>Nenhuma missão urgente ou vencida nos próximos ' + filtroDias + ' dias.</p></div>';
+    c.innerHTML = html;
+}
+
+function renderizarMensagemBruta() { document.getElementById('mensagemBruta').textContent = formatarMensagemWhatsApp(); }
+
+function atualizarTudoWA() {
+    filtroDias = parseInt(document.getElementById('filtroDias').value) || 7;
+    filtroResponsavelWA = document.getElementById('filtroResponsavel').value;
+    renderizarPreviewDiario();
+    renderizarMensagemBruta();
+}
+
+function initWhatsApp() {
+    carregarContatos();
+    const sel = document.getElementById('filtroResponsavel');
+    if (sel) {
+        const resps = new Set();
+        missions.forEach(m => { if (m.responsible) resps.add(m.responsible); });
+        Array.from(resps).sort().forEach(r => { const opt = document.createElement('option'); opt.value = r; opt.textContent = r; sel.appendChild(opt); });
+    }
+    renderizarContatos();
+    renderizarPreviewDiario();
+    renderizarMensagemBruta();
+    const btnEnviar = document.getElementById('btnEnviar');
+    if (btnEnviar) btnEnviar.addEventListener('click', enviarWhatsApp);
+    const btnCopiar = document.getElementById('btnCopiar');
+    if (btnCopiar) btnCopiar.addEventListener('click', copiarMensagem);
+    const fDias = document.getElementById('filtroDias');
+    if (fDias) fDias.addEventListener('change', atualizarTudoWA);
+    const fResp = document.getElementById('filtroResponsavel');
+    if (fResp) fResp.addEventListener('change', atualizarTudoWA);
+    const btnGC = document.getElementById('btnGerenciarContatos');
+    if (btnGC) btnGC.addEventListener('click', abrirModalContatos);
+    const btnSC = document.getElementById('btnSalvarContato');
+    if (btnSC) btnSC.addEventListener('click', salvarContatoForm);
+    const mc = document.getElementById('modalContatos');
+    if (mc) mc.addEventListener('click', function(e) { if (e.target === this) window.fecharModalContatos(); });
 }
 
 function getDaysLeft(d) {
