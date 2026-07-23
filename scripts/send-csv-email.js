@@ -1,9 +1,8 @@
 const https = require('https');
-const nodemailer = require('nodemailer');
 
 const FIREBASE_URL = process.env.FIREBASE_URL;
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_PASS = process.env.GMAIL_PASS;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_TO = process.env.EMAIL_TO;
 
 function fetchJSON(url) {
     return new Promise((resolve, reject) => {
@@ -15,6 +14,28 @@ function fetchJSON(url) {
                 catch (e) { reject(e); }
             });
         }).on('error', reject);
+    });
+}
+
+function postJSON(url, body, headers) {
+    return new Promise((resolve, reject) => {
+        const urlObj = new URL(url);
+        const req = https.request({
+            hostname: urlObj.hostname,
+            path: urlObj.pathname,
+            method: 'POST',
+            headers: headers
+        }, (res) => {
+            let data = '';
+            res.on('data', (chunk) => { data += chunk; });
+            res.on('end', () => {
+                try { resolve(JSON.parse(data)); }
+                catch (e) { reject(new Error('Response: ' + data)); }
+            });
+        });
+        req.on('error', reject);
+        req.write(JSON.stringify(body));
+        req.end();
     });
 }
 
@@ -48,6 +69,7 @@ async function main() {
     });
 
     const csv = '\uFEFF' + header.join(';') + '\n' + rows.join('\n');
+    const csvBase64 = Buffer.from(csv, 'utf-8').toString('base64');
 
     const now = new Date();
     const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -55,29 +77,27 @@ async function main() {
     const dateStr = now.toISOString().split('T')[0];
     const filename = 'missoes_bda_inf_amv_' + dateStr + '.csv';
 
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: GMAIL_USER,
-            pass: GMAIL_PASS
-        }
-    });
-
-    const mailOptions = {
-        from: GMAIL_USER,
-        to: GMAIL_USER,
+    console.log('Sending email via Resend...');
+    const result = await postJSON('https://api.resend.com/emails', {
+        from: 'onboarding@resend.dev',
+        to: [EMAIL_TO],
         subject: 'Exportação CSV - Controle de Missões - ' + monthYear,
         text: 'Segue em anexo a exportação CSV das missões do Controle de Missões E4/Bda Inf Amv.\n\nTotal de missões: ' + missions.length + '\nData de geração: ' + dateStr,
         attachments: [{
             filename: filename,
-            content: csv,
-            contentType: 'text/csv;charset=utf-8;'
+            content: csvBase64
         }]
-    };
+    }, {
+        'Authorization': 'Bearer ' + RESEND_API_KEY,
+        'Content-Type': 'application/json'
+    });
 
-    console.log('Sending email to ' + GMAIL_USER + '...');
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully!');
+    if (result.id) {
+        console.log('Email sent successfully! ID:', result.id);
+    } else {
+        console.error('Failed to send email:', JSON.stringify(result));
+        process.exit(1);
+    }
 }
 
 main().catch(err => {

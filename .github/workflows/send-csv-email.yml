@@ -17,12 +17,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm install nodemailer
-
       - name: Fetch data and send email
         env:
-          GMAIL_USER: luis19730@gmail.com
-          GMAIL_PASS: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           FIREBASE_URL: https://bda-controle-missoes-default-rtdb.firebaseio.com/bda_data.json
+          EMAIL_TO: luis19730@gmail.com
         run: node scripts/send-csv-email.js
