@@ -42,7 +42,9 @@ function clearFirebaseConfig() {
 
 function initFirebase() {
     firebaseConfig = loadFirebaseConfig();
-    if (!firebaseConfig || !firebaseConfig.projectId) return false;
+    if (!firebaseConfig || !firebaseConfig.projectId) {
+        firebaseConfig = DEFAULT_FIREBASE_CONFIG;
+    }
     try {
         if (!firebaseApp) {
             firebaseApp = firebase.initializeApp(firebaseConfig);
@@ -94,7 +96,15 @@ function updateSyncUI() {
 }
 
 function syncSave(payload) {
-    if (!firebaseDb) return;
+    if (!firebaseDb) {
+        initFirebase();
+    }
+    if (!firebaseDb) {
+        syncStatus = 'error';
+        syncError = 'Firebase não conectado';
+        updateSyncUI();
+        return;
+    }
     syncStatus = 'saving';
     updateSyncUI();
     firebaseDb.ref('bda_data').set(payload).then(() => {
@@ -125,13 +135,18 @@ function syncLoad() {
 }
 
 function syncListen(callback) {
-    if (!firebaseDb || listenersAttached) return;
+    if (!firebaseDb) return;
     listenersAttached = true;
     firebaseDb.ref('bda_data').on('value', snap => {
         const data = snap.val();
-        if (data && data.missions) {
+        if (data) {
             callback(data);
         }
+    }, error => {
+        syncStatus = 'error';
+        syncError = error.message;
+        listenersAttached = false;
+        updateSyncUI();
     });
 }
 
@@ -363,6 +378,9 @@ function init() {
             } else {
                 syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
             }
+            syncListen(onRemoteUpdate);
+        }).catch(() => {
+            syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
             syncListen(onRemoteUpdate);
         });
     }
