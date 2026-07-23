@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script>
         (function() {
-            var APP_VERSION = 'v23';
+            var APP_VERSION = 'v24';
             var stored = localStorage.getItem('app_version');
             if (stored !== APP_VERSION) {
                 localStorage.setItem('app_version', APP_VERSION);
@@ -629,7 +629,7 @@
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=23"></script>
+    <script src="app.js?v=24"></script>
     <script>
         if (typeof syncSave !== 'function' || typeof initFirebase !== 'function') {
             localStorage.setItem('app_version', '');

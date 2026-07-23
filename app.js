@@ -250,8 +250,7 @@ function onRemoteUpdate(data) {
     render();
     renderDocs();
     if (typeof renderDashboard === 'function') renderDashboard();
-    rebuildWhatsAppFilters();
-    if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
+    refreshWhatsApp();
 }
 
 function disableSync() {
@@ -785,19 +784,30 @@ function atualizarTudoWA() {
 }
 
 function rebuildWhatsAppFilters() {
-    var sel = document.getElementById('filtroResponsavel');
-    if (!sel) return;
-    var current = sel.value;
-    sel.innerHTML = '<option value="">Todos</option>';
-    var resps = new Set();
-    missions.forEach(function(m) { if (m.responsible) resps.add(m.responsible); });
-    Array.from(resps).sort().forEach(function(r) {
-        var opt = document.createElement('option');
-        opt.value = r;
-        opt.textContent = r;
-        sel.appendChild(opt);
-    });
-    if (current && resps.has(current)) sel.value = current;
+    try {
+        var sel = document.getElementById('filtroResponsavel');
+        if (!sel) return;
+        var current = sel.value;
+        sel.innerHTML = '<option value="">Todos</option>';
+        var resps = new Set();
+        missions.forEach(function(m) { if (m.responsible) resps.add(m.responsible); });
+        Array.from(resps).sort().forEach(function(r) {
+            var opt = document.createElement('option');
+            opt.value = r;
+            opt.textContent = r;
+            sel.appendChild(opt);
+        });
+        if (current && resps.has(current)) sel.value = current;
+    } catch(e) { syncLog('rebuildWA filters error: ' + e.message, true); }
+}
+
+function refreshWhatsApp() {
+    try {
+        rebuildWhatsAppFilters();
+        renderizarPreviewDiario();
+        renderizarMensagemBruta();
+        renderizarContatos();
+    } catch(e) { syncLog('refreshWA error: ' + e.message, true); }
 }
 
 function initWhatsApp() {
