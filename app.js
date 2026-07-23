@@ -249,6 +249,7 @@ function onRemoteUpdate(data) {
     if (data.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(data.savedAt));
     render();
     renderDocs();
+    if (typeof renderDashboard === 'function') renderDashboard();
     if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
 }
 
@@ -561,6 +562,7 @@ function init() {
                 localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remoteSavedAt));
                 render();
                 renderDocs();
+                if (typeof renderDashboard === 'function') renderDashboard();
                 if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
             }
         }).catch(function() {});
