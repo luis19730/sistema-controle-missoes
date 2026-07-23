@@ -245,6 +245,7 @@ function onRemoteUpdate(data) {
     if (data.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(data.savedAt));
     render();
     renderDocs();
+    if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
 }
 
 function disableSync() {
@@ -556,6 +557,7 @@ function init() {
                 localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remoteSavedAt));
                 render();
                 renderDocs();
+                if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
             }
         }).catch(function() {});
     }, 10000);
