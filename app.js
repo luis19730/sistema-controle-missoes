@@ -118,38 +118,37 @@ function updateSyncUI() {
     }
 }
 
+var REST_URL = 'https://bda-controle-missoes-default-rtdb.firebaseio.com/bda_data.json';
+
 function syncSave(payload) {
     if (!firebaseDb) {
         initFirebase();
     }
-    if (!firebaseDb) {
-        syncStatus = 'error';
-        syncError = 'Firebase não conectado';
-        updateSyncUI();
-        return;
-    }
     syncStatus = 'saving';
     updateSyncUI();
-    try {
-        var ref = firebaseDb.ref('bda_data');
-        ref.set(payload).then(function() {
-            syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            syncStatus = 'idle';
-            syncError = '';
-            updateSyncUI();
-            syncLog('Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0) + ', contatos: ' + (payload.contatos ? payload.contatos.length : 0));
-        }).catch(function(e) {
-            syncLog('Save FAILED: ' + e.message + ' ' + (e.code||''), true);
+    if (firebaseDb) {
+        try {
+            var ref = firebaseDb.ref('bda_data');
+            ref.set(payload).then(function() {
+                syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                syncStatus = 'idle';
+                syncError = '';
+                updateSyncUI();
+            }).catch(function(e) {
+                syncLog('SDK save failed, trying REST: ' + e.message, true);
+                fetch(REST_URL, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                    .then(function() { syncStatus = 'idle'; syncError = ''; updateSyncUI(); })
+                    .catch(function(e2) { syncStatus = 'error'; syncError = e2.message; updateSyncUI(); });
+            });
+        } catch(e) {
             syncStatus = 'error';
-            syncError = e.message || 'Erro ao salvar';
+            syncError = e.message;
             updateSyncUI();
-            setTimeout(function() { syncSave(payload); }, 5000);
-        });
-    } catch(e) {
-        syncLog('Save EXCEPTION: ' + e.message, true);
-        syncStatus = 'error';
-        syncError = e.message;
-        updateSyncUI();
+        }
+    } else {
+        fetch(REST_URL, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+            .then(function() { syncStatus = 'idle'; syncError = ''; updateSyncUI(); })
+            .catch(function(e) { syncStatus = 'error'; syncError = e.message; updateSyncUI(); });
     }
 }
 
@@ -559,8 +558,6 @@ function init() {
             syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
         }
     }, 60000);
-
-    var REST_URL = 'https://bda-controle-missoes-default-rtdb.firebaseio.com/bda_data.json';
 
     function pollFirebase() {
         fetch(REST_URL).then(function(r) { return r.json(); }).then(function(remote) {
