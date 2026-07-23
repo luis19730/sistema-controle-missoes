@@ -137,7 +137,7 @@ function syncSave(payload) {
             syncStatus = 'idle';
             syncError = '';
             updateSyncUI();
-            syncLog('Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0));
+            syncLog('Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0) + ', contatos: ' + (payload.contatos ? payload.contatos.length : 0));
         }).catch(function(e) {
             syncLog('Save FAILED: ' + e.message + ' ' + (e.code||''), true);
             syncStatus = 'error';
@@ -594,10 +594,11 @@ let contatos = [];
 let contatoEditandoIdx = -1;
 
 function carregarContatos() {
+    if (contatos.length > 0) return;
     try { contatos = JSON.parse(localStorage.getItem('whatsapp_contatos') || '[]'); } catch (e) { contatos = []; }
     if (contatos.length === 0) {
         contatos = [{ nome: 'Comandante', telefone: '5512988843234' }];
-        salvarContatos();
+        localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
     }
 }
 
