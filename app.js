@@ -560,13 +560,10 @@ function init() {
         }
     }, 60000);
 
+    var REST_URL = 'https://bda-controle-missoes-default-rtdb.firebaseio.com/bda_data.json';
+
     function pollFirebase() {
-        if (!firebaseDb) {
-            initFirebase();
-            if (!firebaseDb) return;
-        }
-        firebaseDb.ref('bda_data').once('value').then(function(snap) {
-            var remote = snap.val();
+        fetch(REST_URL).then(function(r) { return r.json(); }).then(function(remote) {
             if (!remote || !remote.missions) return;
             var remoteSavedAt = remote.savedAt || '';
             var localSavedAt = '';
@@ -586,7 +583,32 @@ function init() {
                 if (typeof renderDashboard === 'function') renderDashboard();
                 refreshWhatsApp();
             }
-        }).catch(function() {});
+        }).catch(function() {
+            if (firebaseDb) {
+                firebaseDb.ref('bda_data').once('value').then(function(snap) {
+                    var remote = snap.val();
+                    if (!remote || !remote.missions) return;
+                    var remoteSavedAt = remote.savedAt || '';
+                    var localSavedAt = '';
+                    try { localSavedAt = JSON.parse(localStorage.getItem('bdaMissions_savedAt') || '""'); } catch(e) {}
+                    if (remoteSavedAt !== localSavedAt) {
+                        missions = remote.missions;
+                        docs = remote.docs || [];
+                        if (remote.contatos && remote.contatos.length) {
+                            contatos = remote.contatos;
+                            localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
+                        }
+                        localStorage.setItem('bdaMissions', JSON.stringify(missions));
+                        localStorage.setItem('bdaDocs', JSON.stringify(docs));
+                        localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remoteSavedAt));
+                        render();
+                        renderDocs();
+                        if (typeof renderDashboard === 'function') renderDashboard();
+                        refreshWhatsApp();
+                    }
+                }).catch(function() {});
+            }
+        });
     }
 
     setInterval(pollFirebase, 10000);
@@ -596,13 +618,6 @@ function init() {
             pollFirebase();
         }
     });
-
-    function showSyncDebug() {
-        var el = document.getElementById('syncLabel');
-        var dot = document.getElementById('syncDot');
-        if (el) el.textContent = 'Firebase: ' + (firebaseDb ? 'OK' : 'OFF') + ' | v26';
-    }
-    setInterval(showSyncDebug, 5000);
 }
 
 // ============ WhatsApp ============
