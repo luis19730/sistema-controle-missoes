@@ -242,6 +242,7 @@ function onRemoteUpdate(data) {
     docs = data.docs || [];
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
     localStorage.setItem('bdaDocs', JSON.stringify(docs));
+    if (data.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(data.savedAt));
     render();
     renderDocs();
 }
@@ -415,6 +416,7 @@ function init() {
                 docs = remote.docs || [];
                 localStorage.setItem('bdaMissions', JSON.stringify(missions));
                 localStorage.setItem('bdaDocs', JSON.stringify(docs));
+                if (remote.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remote.savedAt));
                 render();
                 renderDocs();
             } else {
@@ -536,6 +538,27 @@ function init() {
             syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
         }
     }, 60000);
+
+    setInterval(function() {
+        if (!firebaseDb) return;
+        firebaseDb.ref('bda_data').once('value').then(function(snap) {
+            var remote = snap.val();
+            if (!remote || !remote.missions) return;
+            var remoteSavedAt = remote.savedAt || '';
+            var localSavedAt = '';
+            try { localSavedAt = JSON.parse(localStorage.getItem('bdaMissions_savedAt') || '""'); } catch(e) {}
+            if (remoteSavedAt !== localSavedAt) {
+                syncLog('Polling: atualizado do servidor (' + remote.missions.length + ' missões)');
+                missions = remote.missions;
+                docs = remote.docs || [];
+                localStorage.setItem('bdaMissions', JSON.stringify(missions));
+                localStorage.setItem('bdaDocs', JSON.stringify(docs));
+                localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remoteSavedAt));
+                render();
+                renderDocs();
+            }
+        }).catch(function() {});
+    }, 10000);
 }
 
 // ============ WhatsApp ============
@@ -1132,8 +1155,10 @@ function confirmDelete() {
 
 function save() {
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
-    var payload = { missions: missions, docs: docs, savedAt: new Date().toISOString() };
-    syncLog('save() called, missions: ' + missions.length + ', firebaseDb: ' + !!firebaseDb);
+    var now = new Date().toISOString();
+    localStorage.setItem('bdaMissions_savedAt', JSON.stringify(now));
+    var payload = { missions: missions, docs: docs, savedAt: now };
+    console.log('[SYNC] save() called, missions:', missions.length, 'firebaseDb:', !!firebaseDb);
     syncSave(payload);
 }
 
