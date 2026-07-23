@@ -8,6 +8,20 @@ let syncError = '';
 let firebaseConfig = null;
 let listenersAttached = false;
 
+function syncLog(msg, isError) {
+    var el = document.getElementById('syncLog');
+    if (el) {
+        el.style.display = 'block';
+        var line = document.createElement('div');
+        line.style.color = isError ? '#f44' : '#0f0';
+        line.textContent = new Date().toLocaleTimeString('pt-BR') + ' - ' + msg;
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+        while (el.children.length > 20) el.removeChild(el.firstChild);
+    }
+    if (isError) console.error('[SYNC] ' + msg); else console.log('[SYNC] ' + msg);
+}
+
 const DEFAULT_FIREBASE_CONFIG = {
     apiKey: "AIzaSyB2FGHNE4uMZncqIQpKmrwnGeWcRgGPdGU",
     authDomain: "bda-controle-missoes.firebaseapp.com",
@@ -47,14 +61,14 @@ function initFirebase() {
     }
     try {
         if (!firebaseApp) {
-            console.log('[SYNC] Initializing Firebase with config:', JSON.stringify({projectId: firebaseConfig.projectId, databaseURL: firebaseConfig.databaseURL}));
+            syncLog('Init Firebase: ' + firebaseConfig.projectId + ' / ' + firebaseConfig.databaseURL);
             firebaseApp = firebase.initializeApp(firebaseConfig);
         }
         firebaseDb = firebase.database();
-        console.log('[SYNC] Firebase DB ready, connected:', firebaseDb.ref().toString());
+        syncLog('Firebase DB ready, ref: ' + firebaseDb.ref().toString());
         return true;
     } catch (e) {
-        console.error('[SYNC] initFirebase FAILED:', e.message);
+        syncLog('initFirebase FAILED: ' + e.message, true);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
@@ -119,16 +133,16 @@ function syncSave(payload) {
             syncStatus = 'idle';
             syncError = '';
             updateSyncUI();
-            console.log('[SYNC] Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0));
+            syncLog('Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0));
         }).catch(function(e) {
-            console.error('[SYNC] Save FAILED:', e.message, e.code);
+            syncLog('Save FAILED: ' + e.message + ' ' + (e.code||''), true);
             syncStatus = 'error';
             syncError = e.message || 'Erro ao salvar';
             updateSyncUI();
             setTimeout(function() { syncSave(payload); }, 5000);
         });
     } catch(e) {
-        console.error('[SYNC] Save EXCEPTION:', e.message);
+        syncLog('Save EXCEPTION: ' + e.message, true);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
@@ -144,10 +158,10 @@ function syncLoad() {
         syncError = '';
         updateSyncUI();
         var val = snap.val();
-        console.log('[SYNC] Load OK, missions: ' + (val && val.missions ? val.missions.length : 0));
+        syncLog('Load OK, missions: ' + (val && val.missions ? val.missions.length : 0));
         return val;
     }).catch(function(e) {
-        console.error('[SYNC] Load FAILED:', e.message);
+        syncLog('Load FAILED: ' + e.message, true);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
@@ -157,15 +171,15 @@ function syncLoad() {
 
 function syncListen(callback) {
     if (!firebaseDb) return;
-    console.log('[SYNC] Attaching listener...');
+    syncLog('Attaching listener...');
     firebaseDb.ref('bda_data').on('value', function(snap) {
         var data = snap.val();
-        console.log('[SYNC] Listener fired, hasData:', !!data, 'missions:', data && data.missions ? data.missions.length : 0);
+        syncLog('Listener fired, hasData: ' + !!data + ', missions: ' + (data && data.missions ? data.missions.length : 0));
         if (data) {
             callback(data);
         }
     }, function(error) {
-        console.error('[SYNC] Listener ERROR:', error.message);
+        syncLog('Listener ERROR: ' + error.message, true);
         syncStatus = 'error';
         syncError = error.message;
         listenersAttached = false;
@@ -221,7 +235,7 @@ function saveSyncConfig() {
 
 function onRemoteUpdate(data) {
     if (!data || !data.missions) {
-        console.log('[SYNC] onRemoteUpdate: no data or no missions, skipping');
+        syncLog('onRemoteUpdate: no data or no missions, skipping');
         return;
     }
     missions = data.missions;
@@ -1119,7 +1133,7 @@ function confirmDelete() {
 function save() {
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
     var payload = { missions: missions, docs: docs, savedAt: new Date().toISOString() };
-    console.log('[SYNC] save() called, missions:', missions.length, 'firebaseDb:', !!firebaseDb);
+    syncLog('save() called, missions: ' + missions.length + ', firebaseDb: ' + !!firebaseDb);
     syncSave(payload);
 }
 
