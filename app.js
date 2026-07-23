@@ -11,13 +11,17 @@ let listenersAttached = false;
 function syncLog(msg, isError) {
     var el = document.getElementById('syncLog');
     if (el) {
-        el.style.display = 'block';
-        var line = document.createElement('div');
-        line.style.color = isError ? '#f44' : '#0f0';
-        line.textContent = new Date().toLocaleTimeString('pt-BR') + ' - ' + msg;
-        el.appendChild(line);
-        el.scrollTop = el.scrollHeight;
-        while (el.children.length > 20) el.removeChild(el.firstChild);
+        el.style.display = isError ? 'block' : el.style.display;
+        if (isError) {
+            el.style.display = 'block';
+            var line = document.createElement('div');
+            line.style.color = '#f44';
+            line.textContent = new Date().toLocaleTimeString('pt-BR') + ' - ' + msg;
+            el.appendChild(line);
+            el.scrollTop = el.scrollHeight;
+            while (el.children.length > 10) el.removeChild(el.firstChild);
+            setTimeout(function() { el.style.display = 'none'; }, 15000);
+        }
     }
     if (isError) console.error('[SYNC] ' + msg); else console.log('[SYNC] ' + msg);
 }

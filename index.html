@@ -14,7 +14,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
     <script>
         (function() {
-            var APP_VERSION = 'v20';
+            var APP_VERSION = 'v21';
             var stored = localStorage.getItem('app_version');
             if (stored !== APP_VERSION) {
                 localStorage.setItem('app_version', APP_VERSION);
@@ -51,7 +51,7 @@
                 <span class="sync-label" id="syncLabel">Sync: não configurado</span>
                 <button class="btn btn-small btn-secondary" id="btnSyncConfig" onclick="openSyncConfig()">Config</button>
             </div>
-            <div id="syncLog" style="position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;z-index:99999;max-height:120px;overflow-y:auto;display:none;"></div>
+            <div id="syncLog" style="position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,0.9);color:#0f0;font-family:monospace;font-size:11px;padding:8px 12px;z-index:99999;max-height:60px;overflow-y:auto;display:none;cursor:pointer;" onclick="this.style.display='none'"></div>
         </div>
     </header>
 
@@ -629,7 +629,7 @@
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=20"></script>
+    <script src="app.js?v=21"></script>
     <script>
         if (typeof syncSave !== 'function' || typeof initFirebase !== 'function') {
             localStorage.setItem('app_version', '');
