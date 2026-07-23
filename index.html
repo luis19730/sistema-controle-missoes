@@ -463,6 +463,10 @@
         <div class="whatsapp-section">
             <h3>Filtros</h3>
             <div class="filtros-whatsapp">
+                <div class="filtro-grupo" style="flex:2;min-width:200px;">
+                    <label>Pesquisar</label>
+                    <input type="text" id="filtroTextoWA" class="filtro-input" placeholder="Buscar por ID, evento, classe, responsável..." style="width:100%;">
+                </div>
                 <div class="filtro-grupo">
                     <label>Período</label>
                     <select id="filtroDias" class="filtro-input">
@@ -629,7 +633,7 @@
     </div>
 
     <script src="missions_data.js"></script>
-    <script src="app.js?v=29"></script>
+    <script src="app.js?v=30"></script>
     <script>
         if (typeof syncSave !== 'function' || typeof initFirebase !== 'function') {
             localStorage.setItem('app_version', '');
