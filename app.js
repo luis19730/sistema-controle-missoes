@@ -616,9 +616,18 @@ function init() {
 }
 
 // ============ WhatsApp ============
-
 let filtroDias = 7;
+
 let filtroResponsavelWA = '';
+
+let filtroTextoWA = '';
+
+function missaoTextoMatch(m, texto) {
+    if (!texto) return true;
+    const t = texto.toLowerCase();
+    const campos = [m.id, m.event, m.responsible, m.status, m.class, m.notes, m.omds, m.escSup].filter(Boolean);
+    return campos.some(c => c.toLowerCase().includes(t));
+}
 let missoesVisiveis = [];
 let selecionadas = new Set();
 let contatos = [];
@@ -715,6 +724,7 @@ function obterMissoesProximosDias() {
     return missions.filter(m => {
         if (m.status === 'RESOLVIDO') return false;
         if (filtroResponsavelWA && m.responsible !== filtroResponsavelWA) return false;
+        if (!missaoTextoMatch(m, filtroTextoWA)) return false;
         const d = normalizarData(m.deadline);
         if (!d) return false;
         return d >= hoje && d <= limite;
@@ -732,6 +742,7 @@ function obterMissoesVencidas() {
     return missions.filter(m => {
         if (m.status === 'RESOLVIDO') return false;
         if (filtroResponsavelWA && m.responsible !== filtroResponsavelWA) return false;
+        if (!missaoTextoMatch(m, filtroTextoWA)) return false;
         const d = normalizarData(m.deadline);
         if (!d) return false;
         return d < hoje;
@@ -825,6 +836,7 @@ function renderizarMensagemBruta() { document.getElementById('mensagemBruta').te
 function atualizarTudoWA() {
     filtroDias = parseInt(document.getElementById('filtroDias').value) || 7;
     filtroResponsavelWA = document.getElementById('filtroResponsavel').value;
+    filtroTextoWA = (document.getElementById('filtroTextoWA').value || '').trim();
     renderizarPreviewDiario();
     renderizarMensagemBruta();
 }
@@ -875,6 +887,8 @@ function initWhatsApp() {
     if (fDias) fDias.addEventListener('change', atualizarTudoWA);
     const fResp = document.getElementById('filtroResponsavel');
     if (fResp) fResp.addEventListener('change', atualizarTudoWA);
+    const fTexto = document.getElementById('filtroTextoWA');
+    if (fTexto) fTexto.addEventListener('input', atualizarTudoWA);
     const btnGC = document.getElementById('btnGerenciarContatos');
     if (btnGC) btnGC.addEventListener('click', abrirModalContatos);
     const btnSC = document.getElementById('btnSalvarContato');
