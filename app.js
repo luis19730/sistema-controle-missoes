@@ -250,6 +250,7 @@ function onRemoteUpdate(data) {
     render();
     renderDocs();
     if (typeof renderDashboard === 'function') renderDashboard();
+    rebuildWhatsAppFilters();
     if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
 }
 
@@ -563,6 +564,7 @@ function init() {
                 render();
                 renderDocs();
                 if (typeof renderDashboard === 'function') renderDashboard();
+                rebuildWhatsAppFilters();
                 if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
             }
         }).catch(function() {});
@@ -780,6 +782,22 @@ function atualizarTudoWA() {
     filtroResponsavelWA = document.getElementById('filtroResponsavel').value;
     renderizarPreviewDiario();
     renderizarMensagemBruta();
+}
+
+function rebuildWhatsAppFilters() {
+    var sel = document.getElementById('filtroResponsavel');
+    if (!sel) return;
+    var current = sel.value;
+    sel.innerHTML = '<option value="">Todos</option>';
+    var resps = new Set();
+    missions.forEach(function(m) { if (m.responsible) resps.add(m.responsible); });
+    Array.from(resps).sort().forEach(function(r) {
+        var opt = document.createElement('option');
+        opt.value = r;
+        opt.textContent = r;
+        sel.appendChild(opt);
+    });
+    if (current && resps.has(current)) sel.value = current;
 }
 
 function initWhatsApp() {
