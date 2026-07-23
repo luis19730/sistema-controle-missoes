@@ -31,9 +31,7 @@ const DEFAULT_FIREBASE_CONFIG = {
     authDomain: "bda-controle-missoes.firebaseapp.com",
     databaseURL: "https://bda-controle-missoes-default-rtdb.firebaseio.com",
     projectId: "bda-controle-missoes",
-    storageBucket: "bda-controle-missoes.firebasestorage.app",
-    messagingSenderId: "968392432514",
-    appId: "1:968392432514:web:ca0aeb30739c085e994d9b"
+    storageBucket: "bda-controle-missoes.firebasestorage.app"
 };
 
 function loadFirebaseConfig() {
