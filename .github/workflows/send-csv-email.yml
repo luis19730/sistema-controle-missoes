@@ -1,0 +1,28 @@
+name: Send CSV Email (25th monthly)
+
+on:
+  schedule:
+    - cron: '0 11 25 * *'
+  workflow_dispatch:
+
+jobs:
+  send-csv:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install nodemailer
+
+      - name: Fetch data and send email
+        env:
+          GMAIL_USER: luis19730@gmail.com
+          GMAIL_PASS: ${{ secrets.GMAIL_APP_PASSWORD }}
+          FIREBASE_URL: https://bda-controle-missoes-default-rtdb.firebaseio.com/bda_data.json
+        run: node scripts/send-csv-email.js
