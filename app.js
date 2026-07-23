@@ -552,13 +552,19 @@ function init() {
     initWhatsApp();
 
     setInterval(function() {
+        if (!firebaseDb) {
+            initFirebase();
+        }
         if (firebaseDb && missions.length > 0) {
             syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
         }
     }, 60000);
 
-    setInterval(function() {
-        if (!firebaseDb) return;
+    function pollFirebase() {
+        if (!firebaseDb) {
+            initFirebase();
+            if (!firebaseDb) return;
+        }
         firebaseDb.ref('bda_data').once('value').then(function(snap) {
             var remote = snap.val();
             if (!remote || !remote.missions) return;
@@ -581,7 +587,22 @@ function init() {
                 refreshWhatsApp();
             }
         }).catch(function() {});
-    }, 10000);
+    }
+
+    setInterval(pollFirebase, 10000);
+
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            pollFirebase();
+        }
+    });
+
+    function showSyncDebug() {
+        var el = document.getElementById('syncLabel');
+        var dot = document.getElementById('syncDot');
+        if (el) el.textContent = 'Firebase: ' + (firebaseDb ? 'OK' : 'OFF') + ' | v26';
+    }
+    setInterval(showSyncDebug, 5000);
 }
 
 // ============ WhatsApp ============
