@@ -47,11 +47,14 @@ function initFirebase() {
     }
     try {
         if (!firebaseApp) {
+            console.log('[SYNC] Initializing Firebase with config:', JSON.stringify({projectId: firebaseConfig.projectId, databaseURL: firebaseConfig.databaseURL}));
             firebaseApp = firebase.initializeApp(firebaseConfig);
         }
         firebaseDb = firebase.database();
+        console.log('[SYNC] Firebase DB ready, connected:', firebaseDb.ref().toString());
         return true;
     } catch (e) {
+        console.error('[SYNC] initFirebase FAILED:', e.message);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
@@ -79,6 +82,7 @@ function updateSyncUI() {
         case 'idle':
             dot.classList.add('sync-ok');
             label.textContent = syncLastSave ? 'Sync: ok (' + syncLastSave + ')' : 'Sync: conectado';
+            label.title = syncError || '';
             break;
         case 'loading':
             dot.classList.add('sync-loading');
@@ -91,6 +95,7 @@ function updateSyncUI() {
         case 'error':
             dot.classList.add('sync-error');
             label.textContent = 'Sync: erro - ' + (syncError || 'verifique a config');
+            label.title = syncError || '';
             break;
     }
 }
@@ -107,26 +112,42 @@ function syncSave(payload) {
     }
     syncStatus = 'saving';
     updateSyncUI();
-    firebaseDb.ref('bda_data').set(payload).then(() => {
-        syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        syncStatus = 'idle';
-        updateSyncUI();
-    }).catch(e => {
+    try {
+        var ref = firebaseDb.ref('bda_data');
+        ref.set(payload).then(function() {
+            syncLastSave = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            syncStatus = 'idle';
+            syncError = '';
+            updateSyncUI();
+            console.log('[SYNC] Save OK at ' + syncLastSave + ', missions: ' + (payload.missions ? payload.missions.length : 0));
+        }).catch(function(e) {
+            console.error('[SYNC] Save FAILED:', e.message, e.code);
+            syncStatus = 'error';
+            syncError = e.message || 'Erro ao salvar';
+            updateSyncUI();
+            setTimeout(function() { syncSave(payload); }, 5000);
+        });
+    } catch(e) {
+        console.error('[SYNC] Save EXCEPTION:', e.message);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
-    });
+    }
 }
 
 function syncLoad() {
     if (!firebaseDb) return Promise.resolve(null);
     syncStatus = 'loading';
     updateSyncUI();
-    return firebaseDb.ref('bda_data').once('value').then(snap => {
+    return firebaseDb.ref('bda_data').once('value').then(function(snap) {
         syncStatus = 'idle';
+        syncError = '';
         updateSyncUI();
-        return snap.val();
-    }).catch(e => {
+        var val = snap.val();
+        console.log('[SYNC] Load OK, missions: ' + (val && val.missions ? val.missions.length : 0));
+        return val;
+    }).catch(function(e) {
+        console.error('[SYNC] Load FAILED:', e.message);
         syncStatus = 'error';
         syncError = e.message;
         updateSyncUI();
@@ -136,18 +157,21 @@ function syncLoad() {
 
 function syncListen(callback) {
     if (!firebaseDb) return;
-    listenersAttached = true;
-    firebaseDb.ref('bda_data').on('value', snap => {
-        const data = snap.val();
+    console.log('[SYNC] Attaching listener...');
+    firebaseDb.ref('bda_data').on('value', function(snap) {
+        var data = snap.val();
+        console.log('[SYNC] Listener fired, hasData:', !!data, 'missions:', data && data.missions ? data.missions.length : 0);
         if (data) {
             callback(data);
         }
-    }, error => {
+    }, function(error) {
+        console.error('[SYNC] Listener ERROR:', error.message);
         syncStatus = 'error';
         syncError = error.message;
         listenersAttached = false;
         updateSyncUI();
     });
+    listenersAttached = true;
 }
 
 function openSyncConfig() {
@@ -196,8 +220,12 @@ function saveSyncConfig() {
 }
 
 function onRemoteUpdate(data) {
-    missions = data.missions || [...INITIAL_DATA];
-    docs = data.docs || [...INITIAL_DOCS];
+    if (!data || !data.missions) {
+        console.log('[SYNC] onRemoteUpdate: no data or no missions, skipping');
+        return;
+    }
+    missions = data.missions;
+    docs = data.docs || [];
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
     localStorage.setItem('bdaDocs', JSON.stringify(docs));
     render();
@@ -488,6 +516,12 @@ function init() {
     render();
     renderDocs();
     initWhatsApp();
+
+    setInterval(function() {
+        if (firebaseDb && missions.length > 0) {
+            syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+        }
+    }, 60000);
 }
 
 // ============ WhatsApp ============
@@ -1084,7 +1118,9 @@ function confirmDelete() {
 
 function save() {
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
-    syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+    var payload = { missions: missions, docs: docs, savedAt: new Date().toISOString() };
+    console.log('[SYNC] save() called, missions:', missions.length, 'firebaseDb:', !!firebaseDb);
+    syncSave(payload);
 }
 
 function exportCSV() {
