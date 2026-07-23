@@ -225,6 +225,10 @@ function saveSyncConfig() {
                 if (confirm('Dados encontrados no Firebase. Deseja carregá-los (substitui dados locais)?')) {
                     missions = remote.missions;
                     docs = remote.docs || [];
+                    if (remote.contatos && remote.contatos.length) {
+                        contatos = remote.contatos;
+                        localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
+                    }
                     localStorage.setItem('bdaMissions', JSON.stringify(missions));
                     localStorage.setItem('bdaDocs', JSON.stringify(docs));
                     render();
@@ -244,6 +248,10 @@ function onRemoteUpdate(data) {
     }
     missions = data.missions;
     docs = data.docs || [];
+    if (data.contatos && data.contatos.length) {
+        contatos = data.contatos;
+        localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
+    }
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
     localStorage.setItem('bdaDocs', JSON.stringify(docs));
     if (data.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(data.savedAt));
@@ -420,17 +428,21 @@ function init() {
             if (remote && remote.missions) {
                 missions = remote.missions;
                 docs = remote.docs || [];
+                if (remote.contatos && remote.contatos.length) {
+                    contatos = remote.contatos;
+                    localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
+                }
                 localStorage.setItem('bdaMissions', JSON.stringify(missions));
                 localStorage.setItem('bdaDocs', JSON.stringify(docs));
                 if (remote.savedAt) localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remote.savedAt));
                 render();
                 renderDocs();
             } else {
-                syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+                syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
             }
             syncListen(onRemoteUpdate);
         }).catch(() => {
-            syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+            syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
             syncListen(onRemoteUpdate);
         });
     }
@@ -541,7 +553,7 @@ function init() {
 
     setInterval(function() {
         if (firebaseDb && missions.length > 0) {
-            syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+            syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
         }
     }, 60000);
 
@@ -554,17 +566,19 @@ function init() {
             var localSavedAt = '';
             try { localSavedAt = JSON.parse(localStorage.getItem('bdaMissions_savedAt') || '""'); } catch(e) {}
             if (remoteSavedAt !== localSavedAt) {
-                syncLog('Polling: atualizado do servidor (' + remote.missions.length + ' missões)');
                 missions = remote.missions;
                 docs = remote.docs || [];
+                if (remote.contatos && remote.contatos.length) {
+                    contatos = remote.contatos;
+                    localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos));
+                }
                 localStorage.setItem('bdaMissions', JSON.stringify(missions));
                 localStorage.setItem('bdaDocs', JSON.stringify(docs));
                 localStorage.setItem('bdaMissions_savedAt', JSON.stringify(remoteSavedAt));
                 render();
                 renderDocs();
                 if (typeof renderDashboard === 'function') renderDashboard();
-                rebuildWhatsAppFilters();
-                if (typeof atualizarTudoWA === 'function') atualizarTudoWA();
+                refreshWhatsApp();
             }
         }).catch(function() {});
     }, 10000);
@@ -587,7 +601,7 @@ function carregarContatos() {
     }
 }
 
-function salvarContatos() { localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos)); }
+function salvarContatos() { localStorage.setItem('whatsapp_contatos', JSON.stringify(contatos)); syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() }); }
 
 function renderizarContatos() {
     const c = document.getElementById('listaContatos');
@@ -1193,8 +1207,7 @@ function save() {
     localStorage.setItem('bdaMissions', JSON.stringify(missions));
     var now = new Date().toISOString();
     localStorage.setItem('bdaMissions_savedAt', JSON.stringify(now));
-    var payload = { missions: missions, docs: docs, savedAt: now };
-    console.log('[SYNC] save() called, missions:', missions.length, 'firebaseDb:', !!firebaseDb);
+    var payload = { missions: missions, docs: docs, contatos: contatos, savedAt: now };
     syncSave(payload);
 }
 
@@ -1394,7 +1407,7 @@ function confirmDeleteDoc() {
 
 function saveDocs() {
     localStorage.setItem('bdaDocs', JSON.stringify(docs));
-    syncSave({ missions: missions, docs: docs, savedAt: new Date().toISOString() });
+    syncSave({ missions: missions, docs: docs, contatos: contatos, savedAt: new Date().toISOString() });
 }
 
 function exportDocCSV() {
