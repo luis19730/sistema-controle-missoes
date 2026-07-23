@@ -31,14 +31,8 @@
                 appId: "1:968392432514:web:ca0aeb30739c085e994d9b"
             };
             try {
-                var raw = localStorage.getItem('firebase_config');
-                var parsed = raw ? JSON.parse(raw) : null;
-                if (!parsed || !parsed.projectId) {
-                    localStorage.setItem('firebase_config', JSON.stringify(DEFAULT_FB));
-                }
-            } catch(e) {
                 localStorage.setItem('firebase_config', JSON.stringify(DEFAULT_FB));
-            }
+            } catch(e) {}
             window.__DEFAULT_FIREBASE_CONFIG = DEFAULT_FB;
         })();
     </script>
