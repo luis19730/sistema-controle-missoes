@@ -2091,7 +2091,9 @@ function renderProximasMissoes() {
     });
 
     const btn = document.getElementById('btnProximos14');
-    if (btn) btn.textContent = 'Próx. 14 dias (' + upcoming.length + ')';
+    if (btn) {
+        btn.innerHTML = 'Próx. 14 dias <span class="btn-count">' + upcoming.length + '</span>';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);
