@@ -978,7 +978,7 @@ function getFiltered() {
             const d = getDaysLeft(m.deadline);
             if (!(d !== null && d < 0 && m.status !== 'RESOLVIDO')) return false;
         }
-        if (quickFilter === 'deadline') {
+        if (quickFilter === 'deadline' || quickFilter === 'PRAZO DE RESPOSTA') {
             if (m.status !== 'PRAZO DE RESPOSTA') return false;
         }
         if (quickFilter === 'upcoming14') {
@@ -1012,7 +1012,7 @@ function render() {
     let data = getFiltered();
 
     document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
-    document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline');
+    document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline' || quickFilter === 'PRAZO DE RESPOSTA');
     document.getElementById('btnProximos14').classList.toggle('active', quickFilter === 'upcoming14');
     document.querySelectorAll('.stat-card.clickable').forEach(card => {
         card.classList.toggle('active', card.dataset.filter === quickFilter);
