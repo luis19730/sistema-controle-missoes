@@ -1317,3 +1317,16 @@ td.deadline-cell {
 .sync-dot.sync-error { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
 @keyframes syncPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 .sync-label { font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap; }
+
+.btn-drive-header {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #0066DA 0%, #00AC47 100%);
+    color: #fff; font-size: 13px; font-weight: 700;
+    padding: 7px 14px; border-radius: 20px;
+    text-decoration: none; margin-left: 16px;
+    box-shadow: 0 2px 8px rgba(0,102,218,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap; flex-shrink: 0;
+}
+.btn-drive-header:hover { transform: scale(1.06); box-shadow: 0 4px 14px rgba(0,102,218,0.5); }
+.btn-drive-header svg { flex-shrink: 0; }
