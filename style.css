@@ -1319,15 +1319,15 @@ td.deadline-cell {
 .sync-label { font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap; }
 
 .btn-drive {
-    background: linear-gradient(135deg, #0066DA 0%, #00AC47 50%, #FFBA00 100%) !important;
-    border: none !important;
+    background: #3B82F6 !important;
+    border: 2px solid #2563EB !important;
     display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 4px; padding: 14px 22px !important; min-width: 90px;
     border-radius: 12px !important;
-    box-shadow: 0 3px 14px rgba(0,102,218,0.45);
+    box-shadow: 0 3px 14px rgba(37,99,235,0.45);
     transition: transform 0.15s, box-shadow 0.15s;
     cursor: pointer; text-decoration: none;
 }
-.btn-drive:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 22px rgba(0,102,218,0.55); }
+.btn-drive:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 22px rgba(37,99,235,0.55); background: #2563EB !important; }
 .btn-drive svg { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)); }
 .btn-drive .stat-label { font-size: 13px !important; letter-spacing: 0.5px; }
