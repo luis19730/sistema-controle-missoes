@@ -267,11 +267,11 @@ function normalizarData(str) {
     if (!str) return null;
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return new Date(str + 'T00:00:00');
     const meses = { 'jan': 0, 'fev': 1, 'mar': 2, 'abr': 3, 'mai': 4, 'jun': 5, 'jul': 6, 'ago': 7, 'set': 8, 'out': 9, 'nov': 10, 'dez': 11 };
-    const m = str.match(/(\d{1,2})\s*([a-z]{3})\.?\s*(\d{2,4})/i);
+    const m = str.match(/(\d{1,2})\s*([a-z]{3})\.?\s*(?:de\s+)?(\d{2,4})?/i);
     if (m) {
         const dia = parseInt(m[1]);
         const mes = meses[m[2].toLowerCase()];
-        let ano = parseInt(m[3]);
+        let ano = m[3] ? parseInt(m[3]) : new Date().getFullYear();
         if (ano < 100) ano += 2000;
         if (mes !== undefined) return new Date(ano, mes, dia);
     }
@@ -911,7 +911,13 @@ function initWhatsApp() {
 
 function getDaysLeft(d) {
     if (!d) return null;
-    const deadline = new Date(d + 'T23:59:59');
+    let deadline;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+        deadline = new Date(d + 'T23:59:59');
+    } else {
+        deadline = normalizarData(d);
+    }
+    if (!deadline || isNaN(deadline.getTime())) return null;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
