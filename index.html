@@ -63,23 +63,23 @@
     <!-- Missões Tab -->
     <div class="tab-content active" id="tab-missions">
     <div class="stats-bar">
-        <div class="stat-card">
+        <div class="stat-card clickable" data-filter="all" onclick="toggleStatFilter('all')">
             <span class="stat-number" id="totalMissions">0</span>
             <span class="stat-label">Total</span>
         </div>
-        <div class="stat-card resolved">
+        <div class="stat-card resolved clickable" data-filter="RESOLVIDO" onclick="toggleStatFilter('RESOLVIDO')">
             <span class="stat-number" id="resolvedCount">0</span>
             <span class="stat-label">Resolvido</span>
         </div>
-        <div class="stat-card follow">
+        <div class="stat-card follow clickable" data-filter="ACOMPANHAR" onclick="toggleStatFilter('ACOMPANHAR')">
             <span class="stat-number" id="followCount">0</span>
             <span class="stat-label">Acompanhar</span>
         </div>
-        <div class="stat-card deadline">
+        <div class="stat-card deadline clickable" data-filter="PRAZO DE RESPOSTA" onclick="toggleStatFilter('PRAZO DE RESPOSTA')">
             <span class="stat-number" id="deadlineCount">0</span>
             <span class="stat-label">Prazo Resposta</span>
         </div>
-        <div class="stat-card overdue">
+        <div class="stat-card overdue clickable" data-filter="overdue" onclick="toggleStatFilter('overdue')">
             <span class="stat-number" id="overdueCount">0</span>
             <span class="stat-label">Atrasado</span>
         </div>

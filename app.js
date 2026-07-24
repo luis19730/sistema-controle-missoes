@@ -414,6 +414,12 @@ let deleteTargetIdx = null;
 let deleteDocTargetIdx = null;
 let quickFilter = null;
 
+function toggleStatFilter(filtro) {
+    quickFilter = (quickFilter === filtro) ? null : filtro;
+    currentPage = 1;
+    render();
+}
+
 function init() {
     const saved = localStorage.getItem('bdaMissions');
     missions = saved ? JSON.parse(saved) : [...INITIAL_DATA];
@@ -968,6 +974,12 @@ function getFiltered() {
             const d = getDaysLeft(m.deadline);
             if (!(d !== null && d >= 0 && d <= 14 && m.status !== 'RESOLVIDO')) return false;
         }
+        if (quickFilter === 'RESOLVIDO') {
+            if (m.status !== 'RESOLVIDO') return false;
+        }
+        if (quickFilter === 'ACOMPANHAR') {
+            if (m.status !== 'ACOMPANHAR') return false;
+        }
         return true;
     });
 }
@@ -991,6 +1003,9 @@ function render() {
     document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
     document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline');
     document.getElementById('btnProximos14').classList.toggle('active', quickFilter === 'upcoming14');
+    document.querySelectorAll('.stat-card.clickable').forEach(card => {
+        card.classList.toggle('active', card.dataset.filter === quickFilter);
+    });
     data.sort((a, b) => {
         let va, vb;
         switch (sortCol) {
