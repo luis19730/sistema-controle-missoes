@@ -1366,3 +1366,69 @@ td.deadline-cell {
 .btn-upcoming:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 22px rgba(184,134,11,0.55); background: #996515 !important; }
 .btn-upcoming .stat-number { color: #fff !important; font-size: 1.6rem; }
 .btn-upcoming .stat-label { color: #fff !important; font-size: 11px !important; font-weight: 700; letter-spacing: 0.3px; }
+
+.login-overlay {
+    position: fixed; inset: 0; z-index: 99999;
+    background: linear-gradient(135deg, #1a2e1a 0%, #2d4a2d 40%, #1a2e1a 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+}
+.login-box {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 48px 40px;
+    text-align: center;
+    max-width: 380px; width: 90%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+.login-logo {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255,255,255,0.2);
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.login-title {
+    color: #fff; font-size: 1.5rem; font-weight: 700;
+    margin-bottom: 4px;
+}
+.login-subtitle {
+    color: rgba(255,255,255,0.5); font-size: 0.85rem; font-weight: 400;
+    margin-bottom: 28px;
+}
+.login-input {
+    width: 100%; box-sizing: border-box;
+    padding: 14px 18px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.08);
+    color: #fff; font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+}
+.login-input::placeholder { color: rgba(255,255,255,0.35); }
+.login-input:focus { border-color: #556b2f; box-shadow: 0 0 0 3px rgba(85,107,47,0.3); }
+.login-btn {
+    width: 100%; padding: 14px;
+    background: #556b2f; color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.login-btn:hover { background: #6b8a3a; transform: translateY(-1px); }
+.login-btn:active { transform: translateY(0); }
+.login-error {
+    color: #ef4444; font-size: 0.85rem;
+    margin-top: 12px;
+    animation: shake 0.3s ease;
+}
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-6px); }
+    40%,80% { transform: translateX(6px); }
+}
