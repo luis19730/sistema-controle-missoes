@@ -396,6 +396,23 @@ header::after {
     transform: none;
 }
 
+.btn-upcoming {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: white;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-upcoming:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.btn-upcoming.active {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transform: none;
+}
+
 .btn-action {
     padding: 7px 14px;
     font-size: 0.82rem;

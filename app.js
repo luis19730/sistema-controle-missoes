@@ -494,6 +494,11 @@ function init() {
         currentPage = 1;
         render();
     });
+    document.getElementById('btnProximos14').addEventListener('click', () => {
+        quickFilter = quickFilter === 'upcoming14' ? null : 'upcoming14';
+        currentPage = 1;
+        render();
+    });
     document.querySelectorAll('#tab-missions th.sortable').forEach(th => {
         th.addEventListener('click', () => {
             const col = th.dataset.col;
@@ -959,6 +964,10 @@ function getFiltered() {
         if (quickFilter === 'deadline') {
             if (m.status !== 'PRAZO DE RESPOSTA') return false;
         }
+        if (quickFilter === 'upcoming14') {
+            const d = getDaysLeft(m.deadline);
+            if (!(d !== null && d >= 0 && d <= 14 && m.status !== 'RESOLVIDO')) return false;
+        }
         return true;
     });
 }
@@ -981,6 +990,7 @@ function render() {
 
     document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
     document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline');
+    document.getElementById('btnProximos14').classList.toggle('active', quickFilter === 'upcoming14');
     data.sort((a, b) => {
         let va, vb;
         switch (sortCol) {
@@ -2074,76 +2084,14 @@ function renderProximasMissoes() {
     const fim = new Date(hoje); fim.setDate(fim.getDate() + 14);
     const fimStr = fim.toISOString().split('T')[0];
 
-    const alertDiv = document.getElementById('alertProximas');
-    if (!alertDiv) return;
-
     const upcoming = missions.filter(function(m) {
         if (!m.deadline) return false;
         if (m.status === 'RESOLVIDO') return false;
         return m.deadline >= hojeStr && m.deadline <= fimStr;
     });
-    upcoming.sort(function(a, b) { return a.deadline.localeCompare(b.deadline); });
 
-    if (upcoming.length === 0) {
-        alertDiv.style.display = 'none';
-        return;
-    }
-    alertDiv.style.display = 'flex';
-    document.getElementById('alertProximasCount').textContent = upcoming.length;
-
-    const listDiv = document.getElementById('proximasList');
-    const daysOpt = { day:'2-digit', month:'short' };
-    const diffDays = function(iso) {
-        const d = new Date(iso + 'T12:00:00'); d.setHours(0,0,0,0);
-        return Math.ceil((d - hoje) / 86400000);
-    };
-    const badge = function(s) {
-        const u = (s||'').toUpperCase();
-        if (u === 'PRAZO DE RESPOSTA') return 'badge-prazo';
-        if (u === 'ACOMPANHAR') return 'badge-acompanhar';
-        if (u === 'EVENTO') return 'badge-evento';
-        return 'badge-acompanhar';
-    };
-    const urgency = function(iso) {
-        const d = diffDays(iso);
-        if (d <= 1) return 'urgency-1';
-        if (d <= 3) return 'urgency-2';
-        return 'urgency-3';
-    };
-    const fmt = function(iso) {
-        if (!iso) return '-';
-        return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', daysOpt);
-    };
-    const label = function(iso) {
-        const d = diffDays(iso);
-        if (d === 0) return 'Hoje';
-        if (d === 1) return 'Amanhã';
-        return d + ' dias';
-    };
-
-    listDiv.innerHTML =
-        '<table><thead><tr><th>Prazo</th><th>Evento</th><th>Status</th><th>Resp.</th></tr></thead><tbody>' +
-        upcoming.map(function(m) {
-            return '<tr class="' + urgency(m.deadline) + '">' +
-                '<td>' + fmt(m.deadline) + '<br><span style="font-size:0.62rem;opacity:0.6;">' + label(m.deadline) + '</span></td>' +
-                '<td>' + (m.event || '-') + '</td>' +
-                '<td><span class="badge ' + badge(m.status) + '">' + (m.status || '-') + '</span></td>' +
-                '<td>' + (m.responsible || '-') + '</td>' +
-            '</tr>';
-        }).join('') +
-        '</tbody></table>';
+    const btn = document.getElementById('btnProximos14');
+    if (btn) btn.textContent = 'Próx. 14 dias (' + upcoming.length + ')';
 }
-
-window.toggleProximasList = function() {
-    const list = document.getElementById('proximasList');
-    const btn = document.getElementById('btnToggleProximas');
-    if (list.style.display === 'none' || !list.style.display) {
-        list.style.display = 'block';
-        btn.textContent = 'Fechar lista';
-    } else {
-        list.style.display = 'none';
-        btn.textContent = 'Ver lista';
-    }
-};
 
 document.addEventListener('DOMContentLoaded', init);
