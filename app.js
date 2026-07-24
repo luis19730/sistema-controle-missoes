@@ -428,6 +428,22 @@ function toggleStatFilter(filtro) {
     render();
 }
 
+let quickFilterDoc = null;
+
+function toggleDocFilter(filtro) {
+    if (quickFilterDoc === filtro) {
+        quickFilterDoc = null;
+    } else {
+        quickFilterDoc = filtro;
+        ['filterDocStatus','searchDocInput','searchDocDiex'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    }
+    currentDocPage = 1;
+    renderDocs();
+}
+
 function init() {
     const saved = localStorage.getItem('bdaMissions');
     missions = saved ? JSON.parse(saved) : [...INITIAL_DATA];
@@ -540,6 +556,9 @@ function init() {
     document.getElementById('searchDocInput').addEventListener('input', () => { currentDocPage = 1; renderDocs(); });
     document.getElementById('searchDocDiex').addEventListener('input', () => { currentDocPage = 1; renderDocs(); });
     document.getElementById('filterDocStatus').addEventListener('change', () => { currentDocPage = 1; renderDocs(); });
+    document.querySelectorAll('#tab-documents .stat-card.clickable').forEach(card => {
+        card.addEventListener('click', () => { toggleDocFilter(card.dataset.docfilter); });
+    });
     document.querySelectorAll('#tab-documents th.sortable').forEach(th => {
         th.addEventListener('click', () => {
             const col = th.dataset.col;
@@ -1318,6 +1337,15 @@ function getDocsFiltered() {
         if (search && !d.subject.toLowerCase().includes(search)) return false;
         if (diex && !d.diex.toLowerCase().includes(diex)) return false;
         if (statusF && d.docStatus !== statusF) return false;
+        if (quickFilterDoc === 'RESOLVIDO') {
+            if (d.docStatus !== 'RESOLVIDO') return false;
+        }
+        if (quickFilterDoc === 'PENDENTE') {
+            if (d.docStatus && d.docStatus !== 'PENDENTE') return false;
+        }
+        if (quickFilterDoc === 'AGENDAR') {
+            if (d.docStatus !== 'AGENDAR') return false;
+        }
         return true;
     });
 }
@@ -1332,6 +1360,9 @@ function updateDocStats() {
 function renderDocs() {
     updateDocStats();
     let data = getDocsFiltered();
+    document.querySelectorAll('#tab-documents .stat-card.clickable').forEach(card => {
+        card.classList.toggle('active', card.dataset.docfilter === quickFilterDoc);
+    });
     const statusOrder = { 'AGENDAR': 0, 'PENDENTE': 1, '': 2, 'RESOLVIDO': 3 };
     data.sort((a, b) => {
         const sa = statusOrder[a.docStatus] ?? 1;

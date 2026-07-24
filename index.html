@@ -182,19 +182,19 @@
     <!-- Documentos Tab -->
     <div class="tab-content" id="tab-documents">
     <div class="stats-bar">
-        <div class="stat-card">
+        <div class="stat-card clickable" data-docfilter="all">
             <span class="stat-number" id="totalDocs">0</span>
             <span class="stat-label">Total</span>
         </div>
-        <div class="stat-card resolved">
+        <div class="stat-card resolved clickable" data-docfilter="RESOLVIDO">
             <span class="stat-number" id="resolvedDocs">0</span>
             <span class="stat-label">Resolvido</span>
         </div>
-        <div class="stat-card follow">
+        <div class="stat-card follow clickable" data-docfilter="PENDENTE">
             <span class="stat-number" id="pendingDocs">0</span>
             <span class="stat-label">Aguardando</span>
         </div>
-        <div class="stat-card deadline">
+        <div class="stat-card deadline clickable" data-docfilter="AGENDAR">
             <span class="stat-number" id="scheduledDocs">0</span>
             <span class="stat-label">Agendar</span>
         </div>
