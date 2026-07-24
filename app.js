@@ -522,24 +522,6 @@ function init() {
         currentPage = 1;
         render();
     });
-    document.getElementById('btnPrazoResposta').addEventListener('click', () => {
-        quickFilter = quickFilter === 'deadline' ? null : 'deadline';
-        currentPage = 1;
-        render();
-    });
-    document.getElementById('btnProximos14').addEventListener('click', () => {
-        quickFilter = quickFilter === 'upcoming14' ? null : 'upcoming14';
-        currentPage = 1;
-        render();
-    });
-    document.querySelectorAll('#tab-missions th.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-            const col = th.dataset.col;
-            if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-            else { sortCol = col; sortDir = 'asc'; }
-            render();
-        });
-    });
     document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
     document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal(); });
 
@@ -1035,9 +1017,6 @@ function render() {
     updateStats();
     let data = getFiltered();
 
-    document.getElementById('btnAtrasados').classList.toggle('active', quickFilter === 'overdue');
-    document.getElementById('btnPrazoResposta').classList.toggle('active', quickFilter === 'deadline' || quickFilter === 'PRAZO DE RESPOSTA');
-    document.getElementById('btnProximos14').classList.toggle('active', quickFilter === 'upcoming14');
     document.querySelectorAll('.stat-card.clickable').forEach(card => {
         card.classList.toggle('active', card.dataset.filter === quickFilter);
     });
@@ -2151,11 +2130,6 @@ function renderProximasMissoes() {
         if (m.status === 'RESOLVIDO') return false;
         return m.deadline >= hojeStr && m.deadline <= fimStr;
     });
-
-    const btn = document.getElementById('btnProximos14');
-    if (btn) {
-        btn.innerHTML = 'Próx. 14 dias <span class="btn-count">' + upcoming.length + '</span>';
-    }
 }
 
 document.addEventListener('DOMContentLoaded', init);
