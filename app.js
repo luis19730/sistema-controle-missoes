@@ -514,9 +514,6 @@ function init() {
         currentPage = 1;
         render();
     });
-    document.querySelectorAll('.stat-card.clickable').forEach(card => {
-        card.addEventListener('click', () => { toggleStatFilter(card.dataset.filter); });
-    });
     document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
     document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal(); });
 
@@ -533,9 +530,6 @@ function init() {
     document.getElementById('searchDocInput').addEventListener('input', () => { currentDocPage = 1; renderDocs(); });
     document.getElementById('searchDocDiex').addEventListener('input', () => { currentDocPage = 1; renderDocs(); });
     document.getElementById('filterDocStatus').addEventListener('change', () => { currentDocPage = 1; renderDocs(); });
-    document.querySelectorAll('#tab-documents .stat-card.clickable').forEach(card => {
-        card.addEventListener('click', () => { toggleDocFilter(card.dataset.docfilter); });
-    });
     document.querySelectorAll('#tab-documents th.sortable').forEach(th => {
         th.addEventListener('click', () => {
             const col = th.dataset.col;
