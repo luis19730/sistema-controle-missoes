@@ -1023,6 +1023,11 @@ function updateStats() {
         const d = getDaysLeft(m.deadline);
         return d !== null && d < 0 && m.status !== 'RESOLVIDO';
     }).length;
+    document.getElementById('upcoming14Count').textContent = missions.filter(m => {
+        if (m.status === 'RESOLVIDO') return false;
+        const d = getDaysLeft(m.deadline);
+        return d !== null && d >= 0 && d <= 14;
+    }).length;
 }
 
 function render() {

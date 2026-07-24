@@ -1352,3 +1352,17 @@ td.deadline-cell {
 .btn-drive:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 22px rgba(37,99,235,0.55); background: #2563EB !important; }
 .btn-drive svg { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3)); }
 .btn-drive .stat-label { font-size: 13px !important; letter-spacing: 0.5px; }
+
+.btn-upcoming {
+    background: #B8860B !important;
+    border: 2px solid #996515 !important;
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 14px 22px !important; min-width: 90px;
+    border-radius: 12px !important;
+    box-shadow: 0 3px 14px rgba(184,134,11,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: pointer;
+}
+.btn-upcoming:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 6px 22px rgba(184,134,11,0.55); background: #996515 !important; }
+.btn-upcoming .stat-number { color: #fff !important; font-size: 1.6rem; }
+.btn-upcoming .stat-label { color: #fff !important; font-size: 11px !important; font-weight: 700; letter-spacing: 0.3px; }
