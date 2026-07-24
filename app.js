@@ -415,7 +415,15 @@ let deleteDocTargetIdx = null;
 let quickFilter = null;
 
 function toggleStatFilter(filtro) {
-    quickFilter = (quickFilter === filtro) ? null : filtro;
+    if (quickFilter === filtro) {
+        quickFilter = null;
+    } else {
+        quickFilter = filtro;
+        ['filterStatus','filterClass','filterResponsible','filterDateStart','filterDateEnd','searchInput','searchDiex'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    }
     currentPage = 1;
     render();
 }
