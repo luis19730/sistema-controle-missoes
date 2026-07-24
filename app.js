@@ -517,11 +517,6 @@ function init() {
     document.querySelectorAll('.stat-card.clickable').forEach(card => {
         card.addEventListener('click', () => { toggleStatFilter(card.dataset.filter); });
     });
-    document.getElementById('btnAtrasados').addEventListener('click', () => {
-        quickFilter = quickFilter === 'overdue' ? null : 'overdue';
-        currentPage = 1;
-        render();
-    });
     document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
     document.getElementById('deleteOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeDeleteModal(); });
 
