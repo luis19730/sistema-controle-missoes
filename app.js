@@ -498,6 +498,9 @@ function init() {
         currentPage = 1;
         render();
     });
+    document.querySelectorAll('.stat-card.clickable').forEach(card => {
+        card.addEventListener('click', () => { toggleStatFilter(card.dataset.filter); });
+    });
     document.getElementById('btnAtrasados').addEventListener('click', () => {
         quickFilter = quickFilter === 'overdue' ? null : 'overdue';
         currentPage = 1;
